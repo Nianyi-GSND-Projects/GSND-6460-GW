@@ -19,8 +19,8 @@ namespace CultureMiniature
 				v.color = Color.black;
 			}
 			pm.Triangularize();
+			pm.CalculateNormals();
 			var mesh = pm.CreateMesh();
-			mesh.name = $"Terrain mesh ({subdivisionIteration}x subdivision)";
 			return mesh;
 		}
 
@@ -42,7 +42,8 @@ namespace CultureMiniature
 				new(+1, +p, 00),
 				new(-1, +p, 00),
 				new(-1, -p, 00),
-			}.Select(v => new ProceduralMesh.Vertex() {
+			}.Select(v => new ProceduralMesh.Vertex()
+			{
 				position = v * s,
 			}).ToList();
 
@@ -71,7 +72,8 @@ namespace CultureMiniature
 				(0xC, 0x3, 0x6),
 				(0xC, 0x6, 0x7),
 			}
-				.Select(((int, int, int) t) => {
+				.Select(((int, int, int) t) =>
+				{
 					var (a, b, c) = t;
 					return new List<ProceduralMesh.Vertex> {
 						vertices[a - 1],

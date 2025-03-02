@@ -334,6 +334,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f1ef99b97d16584098ebed162503513, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  radius: 500
+  subdivisionIteration: 5
+  terrainMap: {fileID: 8900000, guid: c84beefe8657b62478f3522e875fe5d8, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

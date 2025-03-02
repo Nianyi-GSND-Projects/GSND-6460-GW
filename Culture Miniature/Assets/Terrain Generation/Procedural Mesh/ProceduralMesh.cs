@@ -21,24 +21,44 @@ namespace CultureMiniature
 		{
 			var vertices = this.vertices;
 			var faces = this.faces;
+			// Use a look-up map to speed up index querying.
+			Dictionary<Vertex, int> indexMap = new();
 
-			foreach(var v in vertices)
-				v.normal = CalculateVertexNormal(v);
+			foreach(var (v, i) in vertices.Select((v, i) => (v, i)))
+				indexMap[v] = i;
 
 			Mesh mesh = new()
 			{
 				subMeshCount = 1,
 			};
-			mesh.SetVertices(vertices.Select(v => v.position).ToArray());
-			mesh.SetNormals(vertices.Select(v => v.normal).ToArray());
-			mesh.SetColors(vertices.Select(v => v.color).ToArray());
-			mesh.SetUVs(0, vertices.Select(v => v.uv).ToArray());
-			List<int> triangles = new();
+			mesh.SetVertices(vertices.Select(v => v.position).ToList());
+			mesh.SetNormals(vertices.Select(v => v.normal).ToList());
+			mesh.SetColors(vertices.Select(v => v.color).ToList());
+			mesh.SetUVs(0, vertices.Select(v => v.uv).ToList());
+
+			List<int> triangles = new(faces.Count * 3);
 			foreach(var face in faces)
-				triangles.AddRange(face.Select(v => vertices.IndexOf(v)));
+			{
+				foreach(var v in face)
+					triangles.Add(indexMap[v]);
+			}
 			mesh.SetTriangles(triangles, 0);
 
 			return mesh;
+		}
+
+		public void CalculateNormals()
+		{
+			foreach(var v in vertices)
+				v.normal = default;
+			foreach(var f in faces)
+			{
+				Vector3 fn = CalculateFaceNormal(f);
+				foreach(var v in f)
+					v.normal += fn;
+			}
+			foreach(var v in vertices)
+				v.normal = v.normal.normalized;
 		}
 
 		Vector3 CalculateVertexNormal(Vertex v)
@@ -127,21 +147,28 @@ namespace CultureMiniature
 				foreach(var v in f)
 					v2fs[v].Add(f);
 			}
+
+			// Use a look-up table to omit repeated calculations.
+			Dictionary<List<Vertex>, (Vector3, Vector3)> fCache = new();
+			foreach(var f in faces)
+				fCache[f] = (Midpoint(f).position, CalculateFaceNormal(f));
+
 			foreach(var (v, fs) in v2fs)
 			{
-				Vector3 n = CalculateVertexNormal(v);
-				Vector3 t = (Midpoint(fs[0]).position - v.position).normalized;
+				Vector3 n = fCache[fs[0]].Item2;
+				Vector3 t = (fCache[fs[0]].Item1 - v.position).normalized;
 				Vector3 t2 = Vector3.Cross(n, t);
 
 				float GetAngle(List<Vertex> f)
 				{
-					Vector3 d = Midpoint(f).position - v.position;
+					Vector3 d = fCache[f].Item1 - v.position;
 					float x = Vector3.Dot(d, t), y = Vector3.Dot(d, t2);
 					return Mathf.Atan2(y, x);
 				}
 
 				fs.Sort((a, b) => GetAngle(a).CompareTo(GetAngle(b)));
 			}
+
 			return v2fs;
 		}
 
@@ -152,7 +179,9 @@ namespace CultureMiniature
 			foreach(var f in faces)
 				midPoints.Add(f, Midpoint(f));
 
-			faces = vertices.Select(v => v2fs[v].Select(f => midPoints[f]).ToList()).ToList();
+			faces = new(vertices.Count);
+			foreach(var v in vertices)
+				faces.Add(v2fs[v].Select(f => midPoints[f]).ToList());
 			vertices = midPoints.Values.ToList();
 		}
 
