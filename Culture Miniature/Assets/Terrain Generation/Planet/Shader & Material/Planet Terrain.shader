@@ -1,10 +1,10 @@
 Shader "Culture Miniature/Planet Terrain" {
 		Properties {
 				baseRadius ("Base radius", Range(0, 1000)) = 500
-				[NoScaleOffset] terrainMap ("Terrain map", Cube) = "black" {}
+				[NoScaleOffset] terrainMap ("Terrain map", Cube) = "gray" {}
 				terrainHeightScale ("Terrain height scale", Range(0, 500)) = 10
-				[MaterialToggle] useBumpMapping ("Use bump-mapping", Float) = 0
-				[Int] bumpMappingIteration ("Bump-mapping iteration", Range(1, 10)) = 1
+				[MaterialToggle] useBumpMapping ("Use bump-mapping", Float) = 1
+				[Int] bumpMappingIteration ("Bump-mapping iteration", Range(1, 10)) = 7
 		}
 		SubShader {
 				Tags {
