@@ -4,6 +4,7 @@ Shader "Culture Miniature/Planet Terrain" {
 				[NoScaleOffset] terrainMap ("Terrain map", Cube) = "black" {}
 				terrainHeightScale ("Terrain height scale", Range(0, 500)) = 10
 				[MaterialToggle] useBumpMapping ("Use bump-mapping", Float) = 0
+				[Int] bumpMappingIteration ("Bump-mapping iteration", Range(1, 10)) = 1
 		}
 		SubShader {
 				Tags {
@@ -22,6 +23,7 @@ Shader "Culture Miniature/Planet Terrain" {
 				UNITY_DECLARE_TEXCUBE(terrainMap);
 				float terrainHeightScale;
 				float useBumpMapping;
+				float bumpMappingIteration;
 
 				/* Structs */
 
@@ -39,14 +41,11 @@ Shader "Culture Miniature/Planet Terrain" {
 					return info.b - 0.5;
 				}
 
-				/**
-					Calculate the sampling position after bump-mapping.
-					Applies to cubemaps only.
-				*/
+				/** Calculate the offset caused by bump-mapping. */
 				float3 BumpMap(float3 pos, float3 viewDir, float3 normalDir, float height) {
 					viewDir = normalize(viewDir);
 					float scale = 1 / dot(normalize(normalDir), viewDir);
-					return pos + viewDir * (scale * height);
+					return viewDir * (scale * height);
 				}
 
 				/* Vertex program */
@@ -85,15 +84,17 @@ Shader "Culture Miniature/Planet Terrain" {
 					float terrainScale = terrainHeightScale / baseRadius;
 
 					/* Bump mapping */
-					// In the planet's local space, after scaling.
-					float3 visualPos;
+					float3 visualPos = IN.planetPos;
 					if(!useBumpMapping)
 						visualPos = IN.planetPos;
 					else {
-						float bump = GetHeight(UNITY_SAMPLE_TEXCUBE(terrainMap, IN.planetPos));
-						bump -= IN.geographicalPos.y;
-						float3 viewDirObj = normalize(ObjSpaceViewDir(float4(IN.meshNormal, 1)));
-						visualPos = BumpMap(IN.planetPos, viewDirObj, IN.meshNormal, bump * terrainScale);
+						float step = pow(0.9, bumpMappingIteration);
+						for(int i = 0; i < bumpMappingIteration; ++i) {
+							float bump = GetHeight(UNITY_SAMPLE_TEXCUBE(terrainMap, visualPos));
+							bump -= IN.geographicalPos.y;
+							float3 viewDirObj = normalize(ObjSpaceViewDir(float4(IN.meshNormal, 1)));
+							visualPos += step * BumpMap(visualPos, viewDirObj, IN.meshNormal, bump * terrainScale);
+						}
 					}
 
 					/* Output */
