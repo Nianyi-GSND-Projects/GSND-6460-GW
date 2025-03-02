@@ -1,8 +1,22 @@
 Shader "Culture Miniature/Planet Terrain" {
 		Properties {
+				[Header(General)][Space]
+				metallic ("Metallic", Range(0, 1)) = 0.1
+				smoothness ("Smoothness", Range(0, 1)) = 0.4
+
+				[Header(Tile)][Space]
+				tileBaseColor ("Tile base color", Color) = (0.5, 0.5, 0.5, 1)
+				tileHighlightColor ("Tile highlight color", Color) = (1, 1, 1, 1)
+				tilePower ("Tile power", Range(-3, 3)) = 0
+
+				[Header(Border)][Space]
+				borderRatio ("Border Ratio", Range(0, 0.5)) = 0.05
+				borderColor ("Border Color", Color) = (0.0, 0.0, 0.0, 1)
+
+				[Header(Terrain)][Space]
 				baseRadius ("Base radius", Range(0, 1000)) = 500
 				[NoScaleOffset] terrainMap ("Terrain map", Cube) = "gray" {}
-				terrainHeightScale ("Terrain height scale", Range(0, 500)) = 10
+				terrainHeightScale ("Terrain height scale", Range(0, 20)) = 10
 				[MaterialToggle] useBumpMapping ("Use bump-mapping", Float) = 1
 				[Int] bumpMappingIteration ("Bump-mapping iteration", Range(1, 10)) = 7
 		}
@@ -19,6 +33,16 @@ Shader "Culture Miniature/Planet Terrain" {
 
 				/* Properties */
 
+				float metallic;
+				float smoothness;
+
+				float4 tileBaseColor;
+				float4 tileHighlightColor;
+				float tilePower;
+
+				float borderRatio;
+				float4 borderColor;
+
 				float baseRadius;
 				UNITY_DECLARE_TEXCUBE(terrainMap);
 				float terrainHeightScale;
@@ -32,6 +56,7 @@ Shader "Culture Miniature/Planet Terrain" {
 					float3 planetPos;
 					float3 geographicalPos;  // (latitude, altitude, longtitude)
 					float3 meshNormal;
+					float centralness;
 				};
 
 				/* Auxiliary functions */
@@ -63,6 +88,7 @@ Shader "Culture Miniature/Planet Terrain" {
 
 					// TODO: Update the normal to match the tweaked shape.
 					o.meshNormal = v.normal;
+					o.centralness = v.color.r;
 				}
 
 				/* Surface program */
@@ -97,11 +123,15 @@ Shader "Culture Miniature/Planet Terrain" {
 						}
 					}
 
+					/* Key properties */
+					float height01 = GetHeight(UNITY_SAMPLE_TEXCUBE(terrainMap, visualPos)) + 0.5;
+					float borderness = step(1 - IN.centralness, 1 - borderRatio);
+
 					/* Output */
-					o.Albedo = float3(1, 1, 1) * (GetHeight(UNITY_SAMPLE_TEXCUBE(terrainMap, visualPos)) + .5);
-					o.Metallic = 0;
-					o.Smoothness = 0;
-					o.Occlusion = 1;
+					o.Albedo = lerp(borderColor, lerp(tileBaseColor, tileHighlightColor, pow(height01, exp(tilePower))), borderness);
+					o.Metallic = metallic;
+					o.Smoothness = smoothness;
+					o.Occlusion = clamp(0, 1, height01 * 2);
 					o.Alpha = 1;
 				}
 				ENDCG

@@ -11,13 +11,12 @@ namespace CultureMiniature
 			ProceduralMesh pm = CreateIcosahedron();
 			for(int i = 0; i < subdivisionIteration; ++i)
 				pm.Subdivide();
-			foreach(var v in pm.vertices)
-				v.color = Color.black;
 			pm.Dualize();
 			foreach(var v in pm.vertices)
 			{
 				v.position = v.position.normalized;
 				v.uv = new(Mathf.Atan2(v.position.z, v.position.x), Mathf.Asin(v.position.y));
+				v.color = Color.black;
 			}
 			pm.Triangularize();
 			var mesh = pm.CreateMesh();
