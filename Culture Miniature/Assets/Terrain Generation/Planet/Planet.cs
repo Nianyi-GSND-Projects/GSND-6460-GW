@@ -9,7 +9,7 @@ namespace CultureMiniature
 	[RequireComponent(typeof(SphereCollider))]
 	public partial class Planet : MonoBehaviour
 	{
-		#region Geometry
+		#region Planet geometry
 		[SerializeField] private float radius = 500;
 		public float Radius
 		{
@@ -35,32 +35,23 @@ namespace CultureMiniature
 			}
 		}
 		[SerializeField][Range(0, 5)] private int subdivisionIteration = 3;
-		private Mesh terrainMesh;
-		void RefreshTerrainMesh()
-		{
-			DestroyTerrainMesh();
-			terrainMesh = GenerateTerrainMesh();
-			GetComponent<MeshFilter>().sharedMesh = terrainMesh;
-		}
-		void DestroyTerrainMesh()
-		{
-			if(!terrainMesh)
-				return;
-			GetComponent<MeshFilter>().sharedMesh = null;
-			Destroy(terrainMesh);
-			terrainMesh = null;
-		}
+		private Mesh planetMesh;
 		#endregion
 
-		#region Material
+		#region Terrain map
 		const string terrainShaderName = "Culture Miniature/Planet Terrain";
+		[SerializeField] private Texture debugTerrainMap;
+		private RenderTexture terrainMap;
+		#endregion
+
+		#region Terrain rendering
 		private Material terrainMat;
-		[SerializeField] private Cubemap terrainMap;
 		void EnsureTerrainMat()
 		{
 			if(terrainMat)
 				return;
-			terrainMat = new Material(Shader.Find(terrainShaderName)) {
+			terrainMat = new Material(Shader.Find(terrainShaderName))
+			{
 				name = "Planet Terrain (instance)",
 			};
 			terrainMat.SetTexture("terrainMap", terrainMap);
@@ -74,14 +65,21 @@ namespace CultureMiniature
 		{
 			EnsureTerrainMat();
 			Radius = Radius;
-			RefreshTerrainMesh();
+
+			// Planet mesh
+			planetMesh = GenerateTerrainMesh();
+			GetComponent<MeshFilter>().sharedMesh = planetMesh;
 		}
 
 		protected void OnDestroy()
 		{
 			if(terrainMat)
 				Destroy(terrainMat);
-			DestroyTerrainMesh();
+
+			// Planet mesh
+			GetComponent<MeshFilter>().sharedMesh = null;
+			Destroy(planetMesh);
+			planetMesh = null;
 		}
 		#endregion
 	}

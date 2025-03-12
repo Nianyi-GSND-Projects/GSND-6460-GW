@@ -6,8 +6,6 @@ Shader "Culture Miniature/Planet Terrain" {
 
 				[Header(Tile)][Space]
 				tileBaseColor ("Tile base color", Color) = (0.5, 0.5, 0.5, 1)
-				tileHighlightColor ("Tile highlight color", Color) = (1, 1, 1, 1)
-				tilePower ("Tile power", Range(-3, 3)) = 0
 
 				[Header(Border)][Space]
 				borderRatio ("Border Ratio", Range(0, 0.5)) = 0.05
@@ -15,7 +13,7 @@ Shader "Culture Miniature/Planet Terrain" {
 
 				[Header(Terrain)][Space]
 				baseRadius ("Base radius", Range(0, 1000)) = 500
-				[NoScaleOffset] terrainMap ("Terrain map", Cube) = "gray" {}
+				[NoScaleOffset] terrainMap ("Terrain map", 2D) = "gray" {}
 				terrainHeightScale ("Terrain height scale", Range(0, 20)) = 10
 				[MaterialToggle] useBumpMapping ("Use bump-mapping", Float) = 1
 				[Int] bumpMappingIteration ("Bump-mapping iteration", Range(1, 10)) = 7
@@ -30,6 +28,7 @@ Shader "Culture Miniature/Planet Terrain" {
 				#pragma surface SurfaceProgram Standard fullforwardshadows vertex:VertexProgram
 				#pragma target 4.0
 				#include "UnityCG.cginc"
+				#include "./Common Functions.hlsl"
 
 				/* Properties */
 
@@ -44,7 +43,7 @@ Shader "Culture Miniature/Planet Terrain" {
 				float4 borderColor;
 
 				float baseRadius;
-				UNITY_DECLARE_TEXCUBE(terrainMap);
+				sampler2D terrainMap;
 				float terrainHeightScale;
 				float useBumpMapping;
 				float bumpMappingIteration;
@@ -62,8 +61,8 @@ Shader "Culture Miniature/Planet Terrain" {
 				/* Auxiliary functions */
 
 				/** Get height from a cubemap sample. */
-				float GetHeight(float4 info) {
-					return info.b - 0.5;
+				float GetAltitude(float4 info) {
+					return 2 * (info.b - 0.5);
 				}
 
 				/** Calculate the offset caused by bump-mapping. */
@@ -76,8 +75,11 @@ Shader "Culture Miniature/Planet Terrain" {
 				/* Vertex program */
 
 				void VertexProgram(inout appdata_full v, out Input o) {
+					UNITY_INITIALIZE_OUTPUT(Input, o);
+
+					float altitude = SampleTerrainHeightLocal(terrainMap, v.vertex.xyz);
+
 					float radius = baseRadius;
-					float altitude = GetHeight(UNITY_SAMPLE_TEXCUBE_LOD(terrainMap, v.vertex.xyz, 0));
 					radius += altitude * terrainHeightScale;
 					float3 planetPos = o.planetPos = v.vertex.xyz = v.vertex.xyz * (radius / baseRadius);
 					float3 normalizedPos = normalize(planetPos);
@@ -86,7 +88,7 @@ Shader "Culture Miniature/Planet Terrain" {
 					o.geographicalPos.y = altitude;
 					o.geographicalPos.z = atan2(normalizedPos.y, length(normalizedPos.zx));
 
-					// TODO: Update the normal to match the tweaked shape.
+					// Normal is warpped later in the surface program.
 					o.meshNormal = v.normal;
 					o.centralness = v.color.r;
 				}
@@ -116,7 +118,9 @@ Shader "Culture Miniature/Planet Terrain" {
 					else {
 						float step = pow(0.9, bumpMappingIteration);
 						for(int i = 0; i < bumpMappingIteration; ++i) {
-							float bump = GetHeight(UNITY_SAMPLE_TEXCUBE(terrainMap, visualPos));
+							TerrainInfo terrain;
+							SampleTerrainHeightFullLocal(terrainMap, visualPos, terrain);
+							float bump = terrain.altitude;
 							bump -= IN.geographicalPos.y;
 							float3 viewDirObj = normalize(ObjSpaceViewDir(float4(IN.meshNormal, 1)));
 							visualPos += step * BumpMap(visualPos, viewDirObj, IN.meshNormal, bump * terrainScale);
@@ -124,14 +128,16 @@ Shader "Culture Miniature/Planet Terrain" {
 					}
 
 					/* Key properties */
-					float height01 = GetHeight(UNITY_SAMPLE_TEXCUBE(terrainMap, visualPos)) + 0.5;
-					float borderness = step(1 - IN.centralness, 1 - borderRatio);
+					TerrainInfo terrain;
+					SampleTerrainHeightFullLocal(terrainMap, visualPos, terrain);
+					float isBorder = step(1 - IN.centralness, 1 - borderRatio);
 
 					/* Output */
-					o.Albedo = lerp(borderColor, lerp(tileBaseColor, tileHighlightColor, pow(height01, exp(tilePower))), borderness);
+					o.Albedo = lerp(borderColor, tileBaseColor, isBorder);
+					o.Albedo = float3(1, 1, 1) * (terrain.altitude + 1) / 2;  // DEBUG
 					o.Metallic = metallic;
 					o.Smoothness = smoothness;
-					o.Occlusion = clamp(0, 1, height01 * 2);
+					o.Occlusion = terrain.laplacian;
 					o.Alpha = 1;
 				}
 				ENDCG
