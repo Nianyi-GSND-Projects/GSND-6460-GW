@@ -90,11 +90,13 @@ Material:
     - baseRadius: 500
     - borderRatio: 0.05
     - bumpMappingIteration: 7
+    - laplacianSampleRadiusNLog: 1
     - metallic: 0.1
     - radius: 500
     - smoothness: 0.4
-    - terrainHeightScale: 10
+    - terrainHeightScale: 20
     - tilePower: 0
+    - useBakedLaplacian: 0
     - useBumpMapping: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}

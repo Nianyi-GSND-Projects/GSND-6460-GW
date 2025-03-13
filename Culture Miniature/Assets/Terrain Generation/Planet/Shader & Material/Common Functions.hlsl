@@ -40,6 +40,11 @@ float4 SampleTex2D(in sampler2D tex, in float2 uv) {
 #endif
 }
 
+float3 RotateVectorAxisAngle(in float3 vec, in float3 axis, in float3 angle) {
+	float3 c = cross(axis, vec);
+	return vec + sin(angle) * c + (1 - cos(angle)) * cross(axis, c);
+}
+
 /* Terrain height */
 
 float GetTerrainHeight(in float4 col) {
@@ -47,7 +52,7 @@ float GetTerrainHeight(in float4 col) {
 }
 
 float SampleTerrainHeightGeo(in sampler2D terrainMap, in float2 geo) {
-	return GetTerrainHeight(SampleTex2D(terrainMap, geo));
+	return GetTerrainHeight(SampleTex2D(terrainMap, Geo2Uv(geo)));
 }
 
 float SampleTerrainHeightLocal(in sampler2D terrainMap, in float3 local) {
@@ -56,6 +61,29 @@ float SampleTerrainHeightLocal(in sampler2D terrainMap, in float3 local) {
 
 /* Full terrain height info */
 
+float CalculateTerrainHeightSecondDerivativeLocal(in sampler2D terrainMap, in float3 origin,
+	in float3 tangent, in float originHeight, in float angularPixelSize
+) {
+	angularPixelSize *= 0.5;
+	float a = SampleTerrainHeightLocal(terrainMap, RotateVectorAxisAngle(origin, tangent, angularPixelSize));
+	float b = SampleTerrainHeightLocal(terrainMap, RotateVectorAxisAngle(origin, tangent, -angularPixelSize));
+	return (b + a - 2 * originHeight) / angularPixelSize;
+}
+
+float CalculateTerrainHeightLaplacianLocal(in sampler2D terrainMap, in float3 local, in float angularPixelSize) {
+	local = normalize(local);
+	float3 tangent = cross(local, float3(1, 0, 0));
+	if(length(tangent) < 0.1)
+		tangent = cross(local, float3(0, 1, 0));
+	tangent = normalize(tangent);
+	float originHeight = SampleTerrainHeightLocal(terrainMap, local);
+
+	float sum = 0;
+	sum += CalculateTerrainHeightSecondDerivativeLocal(terrainMap, local, tangent, originHeight, angularPixelSize);
+	sum += CalculateTerrainHeightSecondDerivativeLocal(terrainMap, local, cross(tangent, local), originHeight, angularPixelSize);
+	return sum;
+}
+
 void SampleTerrainHeightFullGeo(in sampler2D terrainMap, in float2 geo, out TerrainInfo info) {
 	float2 uv = Geo2Uv(geo);
 	info.geo = geo;
@@ -63,6 +91,7 @@ void SampleTerrainHeightFullGeo(in sampler2D terrainMap, in float2 geo, out Terr
 	info.altitude = GetTerrainHeight(col);
 	info.gradient = col.rg;
 	info.laplacian = col.b;
+	info.laplacian = 0;  // DEBUG
 }
 
 void SampleTerrainHeightFullLocal(in sampler2D terrainMap, in float3 local, out TerrainInfo info) {

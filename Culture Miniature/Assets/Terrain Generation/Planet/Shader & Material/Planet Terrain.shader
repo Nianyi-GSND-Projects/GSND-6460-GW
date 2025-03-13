@@ -17,6 +17,8 @@ Shader "Culture Miniature/Planet Terrain" {
 				terrainHeightScale ("Terrain height scale", Range(0, 20)) = 10
 				[MaterialToggle] useBumpMapping ("Use bump-mapping", Float) = 1
 				[Int] bumpMappingIteration ("Bump-mapping iteration", Range(1, 10)) = 7
+				[MaterialToggle] useBakedLaplacian ("Use baked Laplacian", Float) = 1
+				laplacianSampleRadiusNLog ("Laplacian sample radius negative log", Range(1, 4)) = 2
 		}
 		SubShader {
 				Tags {
@@ -47,6 +49,8 @@ Shader "Culture Miniature/Planet Terrain" {
 				float terrainHeightScale;
 				float useBumpMapping;
 				float bumpMappingIteration;
+				float useBakedLaplacian;
+				float laplacianSampleRadiusNLog;
 
 				/* Structs */
 
@@ -131,13 +135,15 @@ Shader "Culture Miniature/Planet Terrain" {
 					TerrainInfo terrain;
 					SampleTerrainHeightFullLocal(terrainMap, visualPos, terrain);
 					float isBorder = step(1 - IN.centralness, 1 - borderRatio);
+					if(useBakedLaplacian < 0.5)
+						terrain.laplacian = CalculateTerrainHeightLaplacianLocal(terrainMap, visualPos, exp(-laplacianSampleRadiusNLog));
 
 					/* Output */
 					o.Albedo = lerp(borderColor, tileBaseColor, isBorder);
-					o.Albedo = float3(1, 1, 1) * (terrain.altitude + 1) / 2;  // DEBUG
+					o.Albedo = float3(1, 1, 1) * ((terrain.altitude + 1) / 2);  // DEBUG
 					o.Metallic = metallic;
 					o.Smoothness = smoothness;
-					o.Occlusion = terrain.laplacian;
+					o.Occlusion = -terrain.laplacian / 20 + 1;
 					o.Alpha = 1;
 				}
 				ENDCG
