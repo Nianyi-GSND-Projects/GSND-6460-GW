@@ -91,9 +91,11 @@ Material:
     - borderRatio: 0.05
     - bumpMappingIteration: 7
     - laplacianSampleRadiusNLog: 1
-    - metallic: 0.1
+    - laplacianStrength: 0.04
+    - metallic: 0
     - radius: 500
-    - smoothness: 0.4
+    - smoothness: 0
+    - subdivisionIteration: 5
     - terrainHeightScale: 20
     - tilePower: 0
     - useBakedLaplacian: 0

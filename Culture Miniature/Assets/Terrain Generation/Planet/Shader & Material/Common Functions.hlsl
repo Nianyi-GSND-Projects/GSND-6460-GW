@@ -84,6 +84,28 @@ float CalculateTerrainHeightLaplacianLocal(in sampler2D terrainMap, in float3 lo
 	return sum;
 }
 
+float CalculateTerrainHeightLaplacianLayeredLocal(in sampler2D terrainMap, in float3 local, in int endingIteration) {
+	local = normalize(local);
+	float3 tangent = cross(local, float3(1, 0, 0));
+	if(length(tangent) < 0.1)
+		tangent = cross(local, float3(0, 1, 0));
+	tangent = normalize(tangent);
+	float originHeight = SampleTerrainHeightLocal(terrainMap, local);
+
+	float baseAngularPixelSize = HALF_PI;
+	float sum = 0, totalEnergy = 0;
+
+	for(int i = 2; i < endingIteration; ++i) {
+		float scalar = pow(2, -i);
+		totalEnergy += scalar;
+		float angularPixelSize = scalar * baseAngularPixelSize;
+		sum += scalar * CalculateTerrainHeightSecondDerivativeLocal(terrainMap, local, tangent, originHeight, angularPixelSize);
+		sum += scalar * CalculateTerrainHeightSecondDerivativeLocal(terrainMap, local, cross(tangent, local), originHeight, angularPixelSize);
+	}
+
+	return sum / totalEnergy;
+}
+
 void SampleTerrainHeightFullGeo(in sampler2D terrainMap, in float2 geo, out TerrainInfo info) {
 	float2 uv = Geo2Uv(geo);
 	info.geo = geo;

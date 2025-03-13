@@ -1,5 +1,9 @@
 Shader "Culture Miniature/Planet Terrain" {
 		Properties {
+				[Header(Mesh)][Space]
+				baseRadius ("Base radius", Range(0, 1000)) = 500
+				subdivisionIteration ("Subdivision iteration", Range(2, 6)) = 5
+
 				[Header(General)][Space]
 				metallic ("Metallic", Range(0, 1)) = 0.1
 				smoothness ("Smoothness", Range(0, 1)) = 0.4
@@ -12,13 +16,12 @@ Shader "Culture Miniature/Planet Terrain" {
 				borderColor ("Border Color", Color) = (0.0, 0.0, 0.0, 1)
 
 				[Header(Terrain)][Space]
-				baseRadius ("Base radius", Range(0, 1000)) = 500
 				[NoScaleOffset] terrainMap ("Terrain map", 2D) = "gray" {}
 				terrainHeightScale ("Terrain height scale", Range(0, 20)) = 10
 				[MaterialToggle] useBumpMapping ("Use bump-mapping", Float) = 1
 				[Int] bumpMappingIteration ("Bump-mapping iteration", Range(1, 10)) = 7
 				[MaterialToggle] useBakedLaplacian ("Use baked Laplacian", Float) = 1
-				laplacianSampleRadiusNLog ("Laplacian sample radius negative log", Range(1, 4)) = 2
+				laplacianStrength ("Laplacian strength", Range(0, 1)) = 0.1
 		}
 		SubShader {
 				Tags {
@@ -34,6 +37,9 @@ Shader "Culture Miniature/Planet Terrain" {
 
 				/* Properties */
 
+				float baseRadius;
+				float subdivisionIteration;
+
 				float metallic;
 				float smoothness;
 
@@ -44,13 +50,12 @@ Shader "Culture Miniature/Planet Terrain" {
 				float borderRatio;
 				float4 borderColor;
 
-				float baseRadius;
 				sampler2D terrainMap;
 				float terrainHeightScale;
 				float useBumpMapping;
 				float bumpMappingIteration;
 				float useBakedLaplacian;
-				float laplacianSampleRadiusNLog;
+				float laplacianStrength;
 
 				/* Structs */
 
@@ -136,14 +141,13 @@ Shader "Culture Miniature/Planet Terrain" {
 					SampleTerrainHeightFullLocal(terrainMap, visualPos, terrain);
 					float isBorder = step(1 - IN.centralness, 1 - borderRatio);
 					if(useBakedLaplacian < 0.5)
-						terrain.laplacian = CalculateTerrainHeightLaplacianLocal(terrainMap, visualPos, exp(-laplacianSampleRadiusNLog));
+						terrain.laplacian = CalculateTerrainHeightLaplacianLayeredLocal(terrainMap, visualPos, (int)subdivisionIteration + 1);
 
 					/* Output */
 					o.Albedo = lerp(borderColor, tileBaseColor, isBorder);
-					o.Albedo = float3(1, 1, 1) * ((terrain.altitude + 1) / 2);  // DEBUG
 					o.Metallic = metallic;
 					o.Smoothness = smoothness;
-					o.Occlusion = -terrain.laplacian / 20 + 1;
+					o.Occlusion = 1 + clamp(-terrain.laplacian * laplacianStrength, -1, 1);
 					o.Alpha = 1;
 				}
 				ENDCG
