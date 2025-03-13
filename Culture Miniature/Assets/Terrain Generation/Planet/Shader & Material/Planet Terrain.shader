@@ -15,9 +15,9 @@ Shader "Culture Miniature/Planet Terrain" {
 				borderRatio ("Border Ratio", Range(0, 0.5)) = 0.05
 				borderColor ("Border Color", Color) = (0.0, 0.0, 0.0, 1)
 
-				[Header(Terrain)][Space]
-				[NoScaleOffset] terrainMap ("Terrain map", 2D) = "gray" {}
-				terrainHeightScale ("Terrain height scale", Range(0, 20)) = 10
+				[Header(Height map)][Space]
+				[NoScaleOffset] heightMap ("Height map", 2D) = "gray" {}
+				heightScale ("Terrain height scale", Range(0, 20)) = 10
 				[MaterialToggle] useBumpMapping ("Use bump-mapping", Float) = 1
 				[Int] bumpMappingIteration ("Bump-mapping iteration", Range(1, 10)) = 7
 				[MaterialToggle] useBakedLaplacian ("Use baked Laplacian", Float) = 1
@@ -50,8 +50,8 @@ Shader "Culture Miniature/Planet Terrain" {
 				float borderRatio;
 				float4 borderColor;
 
-				sampler2D terrainMap;
-				float terrainHeightScale;
+				sampler2D heightMap;
+				float heightScale;
 				float useBumpMapping;
 				float bumpMappingIteration;
 				float useBakedLaplacian;
@@ -86,15 +86,16 @@ Shader "Culture Miniature/Planet Terrain" {
 				void VertexProgram(inout appdata_full v, out Input o) {
 					UNITY_INITIALIZE_OUTPUT(Input, o);
 
-					float altitude = SampleTerrainHeightLocal(terrainMap, v.vertex.xyz);
+					TerrainInfo terrain;
+					SampleHeight_Local(heightMap, v.vertex.xyz, terrain);
 
 					float radius = baseRadius;
-					radius += altitude * terrainHeightScale;
+					radius += terrain.altitude * heightScale;
 					float3 planetPos = o.planetPos = v.vertex.xyz = v.vertex.xyz * (radius / baseRadius);
 					float3 normalizedPos = normalize(planetPos);
 
 					o.geographicalPos.x = atan2(normalizedPos.z, normalizedPos.x);
-					o.geographicalPos.y = altitude;
+					o.geographicalPos.y = terrain.altitude;
 					o.geographicalPos.z = atan2(normalizedPos.y, length(normalizedPos.zx));
 
 					// Normal is warpped later in the surface program.
@@ -118,7 +119,7 @@ Shader "Culture Miniature/Planet Terrain" {
 
 				void SurfaceProgram(Input IN, inout SurfaceOutputStandard o) {
 					/* Pre-process */
-					float terrainScale = terrainHeightScale / baseRadius;
+					float terrainScale = heightScale / baseRadius;
 
 					/* Bump mapping */
 					float3 visualPos = IN.planetPos;
@@ -128,7 +129,7 @@ Shader "Culture Miniature/Planet Terrain" {
 						float step = pow(0.9, bumpMappingIteration);
 						for(int i = 0; i < bumpMappingIteration; ++i) {
 							TerrainInfo terrain;
-							SampleTerrainHeightFullLocal(terrainMap, visualPos, terrain);
+							SampleHeight_Local(heightMap, visualPos, terrain);
 							float bump = terrain.altitude;
 							bump -= IN.geographicalPos.y;
 							float3 viewDirObj = normalize(ObjSpaceViewDir(float4(IN.meshNormal, 1)));
@@ -138,10 +139,10 @@ Shader "Culture Miniature/Planet Terrain" {
 
 					/* Key properties */
 					TerrainInfo terrain;
-					SampleTerrainHeightFullLocal(terrainMap, visualPos, terrain);
+					SampleHeight_Local(heightMap, visualPos, terrain);
 					float isBorder = step(1 - IN.centralness, 1 - borderRatio);
 					if(useBakedLaplacian < 0.5)
-						terrain.laplacian = CalculateTerrainHeightLaplacianLayeredLocal(terrainMap, visualPos, (int)subdivisionIteration + 1);
+						terrain.laplacian = CalculateHeightLaplacianLayered_Local(heightMap, visualPos, (int)subdivisionIteration + 1);
 
 					/* Output */
 					o.Albedo = lerp(borderColor, tileBaseColor, isBorder);
