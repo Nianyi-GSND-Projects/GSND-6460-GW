@@ -98,6 +98,7 @@ Material:
     - laplacianSampleRadiusNLog: 1
     - laplacianStrength: 0.04
     - metallic: 0
+    - normalStrength: 1
     - radius: 500
     - smoothness: 0
     - subdivisionIteration: 5

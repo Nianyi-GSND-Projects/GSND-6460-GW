@@ -22,6 +22,7 @@ Shader "Culture Miniature/Planet Terrain" {
 				[Int] bumpMappingIteration ("Bump-mapping iteration", Range(1, 10)) = 7
 				[MaterialToggle] useBakedLaplacian ("Use baked Laplacian", Float) = 1
 				laplacianStrength ("Laplacian strength", Range(0, 1)) = 0.1
+				normalStrength ("Normal strength", Range(0, 1)) = 0.1
 		}
 		SubShader {
 				Tags {
@@ -56,6 +57,7 @@ Shader "Culture Miniature/Planet Terrain" {
 				float bumpMappingIteration;
 				float useBakedLaplacian;
 				float laplacianStrength;
+				float normalStrength;
 
 				/* Structs */
 
@@ -142,13 +144,17 @@ Shader "Culture Miniature/Planet Terrain" {
 					SampleHeight_Local(heightMap, visualPos, terrain);
 					float isBorder = step(1 - IN.centralness, 1 - borderRatio);
 					if(useBakedLaplacian < 0.5)
-						terrain.laplacian = CalculateHeightLaplacianLayered_Local(heightMap, visualPos, (int)subdivisionIteration + 1);
+						terrain.laplacian = CalculateHeightLaplacianLayered_Local(heightMap, terrain, (int)subdivisionIteration + 1);
+					terrain.gradient = CalculateHeightGradient_Geo(heightMap, Local2Geo(visualPos), (int)subdivisionIteration);
 
 					/* Output */
 					o.Albedo = lerp(borderColor, tileBaseColor, isBorder);
+					// o.Albedo = float3(terrain.gradient, 1);
+					o.Normal = CalculateTangentSpaceNormal(terrain, normalStrength);
 					o.Metallic = metallic;
 					o.Smoothness = smoothness;
 					o.Occlusion = 1 + clamp(-terrain.laplacian * laplacianStrength, -1, 1);
+					// o.Occlusion = 1;  // DEBUG
 					o.Alpha = 1;
 				}
 				ENDCG
