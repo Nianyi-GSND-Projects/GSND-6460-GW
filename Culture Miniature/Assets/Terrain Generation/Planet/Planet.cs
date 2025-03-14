@@ -40,8 +40,29 @@ namespace CultureMiniature
 
 		#region Terrain map
 		const string terrainShaderName = "Culture Miniature/Planet Terrain";
-		[SerializeField] private Texture debugTerrainMap;
-		private RenderTexture terrainMap;
+		[SerializeField] private Texture debugHeightMap;
+		private RenderTexture heightMap;
+		void CreateHeightMap()
+		{
+			heightMap = new(new RenderTextureDescriptor
+			{
+				width = 2048,
+				height = 1024,
+				colorFormat = RenderTextureFormat.ARGB32,
+				useMipMap = false,
+				dimension = UnityEngine.Rendering.TextureDimension.Tex2D,
+				volumeDepth = 1,
+				msaaSamples = 1,
+			})
+			{
+				wrapMode = TextureWrapMode.Repeat
+			};
+		}
+		void DestroyHeightMap()
+		{
+			Destroy(heightMap);
+			heightMap = null;
+		}
 		#endregion
 
 		#region Terrain rendering
@@ -54,7 +75,7 @@ namespace CultureMiniature
 			{
 				name = "Planet Terrain (instance)",
 			};
-			terrainMat.SetTexture("terrainMap", terrainMap);
+			terrainMat.SetTexture("heightMap", heightMap);
 			var renderer = GetComponent<MeshRenderer>();
 			renderer.sharedMaterial = terrainMat;
 		}
@@ -63,6 +84,10 @@ namespace CultureMiniature
 		#region Untiy life cycle
 		protected void Start()
 		{
+			CreateHeightMap();
+#if DEBUG
+			Graphics.Blit(debugHeightMap, heightMap);
+#endif
 			EnsureTerrainMat();
 			Radius = Radius;
 
@@ -75,6 +100,7 @@ namespace CultureMiniature
 		{
 			if(terrainMat)
 				Destroy(terrainMat);
+			DestroyHeightMap();
 
 			// Planet mesh
 			GetComponent<MeshFilter>().sharedMesh = null;
