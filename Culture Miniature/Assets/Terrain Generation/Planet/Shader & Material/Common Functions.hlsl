@@ -127,7 +127,7 @@ float CalculateHeightLaplacianLayered_Local(in sampler2D heightMap, in TerrainIn
 	return sum;
 }
 
-float2 CalculateHeightGradient_Geo(in sampler2D heightMap, in float2 geo, in int subdivisionIteration) {
+float2 CalculateHeightGradient_Geo(in sampler2D heightMap, in float2 geo, in float subdivisionIteration) {
 	float3 local = Geo2Local(geo);
 	float3 tangent = FindTangent(local), cotangent = cross(tangent, local);
 	float angularPixelSize = pow(2, -subdivisionIteration) * HALF_PI;

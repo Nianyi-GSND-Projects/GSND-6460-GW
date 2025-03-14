@@ -5,8 +5,8 @@ Shader "Culture Miniature/Planet Terrain" {
 				subdivisionIteration ("Subdivision iteration", Range(2, 6)) = 5
 
 				[Header(General)][Space]
-				metallic ("Metallic", Range(0, 1)) = 0.1
-				smoothness ("Smoothness", Range(0, 1)) = 0.4
+				metallic ("Metallic", Range(0, 1)) = 0
+				smoothness ("Smoothness", Range(0, 1)) = 0
 
 				[Header(Tile)][Space]
 				tileBaseColor ("Tile base color", Color) = (0.5, 0.5, 0.5, 1)
@@ -20,9 +20,9 @@ Shader "Culture Miniature/Planet Terrain" {
 				heightScale ("Terrain height scale", Range(0, 20)) = 10
 				[MaterialToggle] useBumpMapping ("Use bump-mapping", Float) = 1
 				[Int] bumpMappingIteration ("Bump-mapping iteration", Range(1, 10)) = 7
-				[MaterialToggle] useBakedLaplacian ("Use baked Laplacian", Float) = 1
-				laplacianStrength ("Laplacian strength", Range(0, 1)) = 0.1
-				normalStrength ("Normal strength", Range(0, 1)) = 0.1
+				[MaterialToggle] useBakedLaplacian ("Use baked Laplacian", Float) = 0
+				laplacianStrength ("Laplacian strength", Range(0, 1)) = 0.01
+				normalStrength ("Normal strength", Range(0, 1)) = 1
 		}
 		SubShader {
 				Tags {
@@ -145,7 +145,7 @@ Shader "Culture Miniature/Planet Terrain" {
 					float isBorder = step(1 - IN.centralness, 1 - borderRatio);
 					if(useBakedLaplacian < 0.5)
 						terrain.laplacian = CalculateHeightLaplacianLayered_Local(heightMap, terrain, (int)subdivisionIteration + 1);
-					terrain.gradient = CalculateHeightGradient_Geo(heightMap, Local2Geo(visualPos), (int)subdivisionIteration);
+					terrain.gradient = CalculateHeightGradient_Geo(heightMap, Local2Geo(visualPos), subdivisionIteration);
 
 					/* Output */
 					o.Albedo = lerp(borderColor, tileBaseColor, isBorder);
