@@ -34,8 +34,21 @@ namespace CultureMiniature
 				terrainMat.SetFloat("baseRadius", radius);
 			}
 		}
-		[SerializeField][Range(0, 5)] private int subdivisionIteration = 3;
+		[SerializeField][Range(0, 5)] private int debugSubdivisionLevel = 3;
 		private Mesh planetMesh;
+		private int subdivisionLevel;
+		public int SubdivisionLevel => subdivisionLevel;
+
+		void UpdatePlanetMesh(Mesh mesh)
+		{
+			if(planetMesh != null)
+			{
+				Destroy(planetMesh);
+				planetMesh = null;
+			}
+			planetMesh = mesh;
+			GetComponent<MeshFilter>().sharedMesh = planetMesh;
+		}
 		#endregion
 
 		#region Terrain map
@@ -91,9 +104,7 @@ namespace CultureMiniature
 			EnsureTerrainMat();
 			Radius = Radius;
 
-			// Planet mesh
-			planetMesh = GenerateTerrainMesh();
-			GetComponent<MeshFilter>().sharedMesh = planetMesh;
+			UpdatePlanetMesh(null);
 		}
 
 		protected void OnDestroy()

@@ -17,6 +17,13 @@ namespace CultureMiniature
 		public List<Vertex> vertices = new();
 		public List<List<Vertex>> faces = new();
 
+		public ProceduralMesh() { }
+		public ProceduralMesh(ProceduralMesh pm)
+		{
+			vertices.AddRange(pm.vertices);
+			faces.AddRange(pm.faces.Select(f => new List<Vertex>(f)));
+		}
+
 		public Mesh CreateMesh()
 		{
 			var vertices = this.vertices;
@@ -59,18 +66,6 @@ namespace CultureMiniature
 			}
 			foreach(var v in vertices)
 				v.normal = v.normal.normalized;
-		}
-
-		Vector3 CalculateVertexNormal(Vertex v)
-		{
-			Vector3 r = Vector3.zero;
-			foreach(var f in faces)
-			{
-				if(!f.Contains(v))
-					continue;
-				r += CalculateFaceNormal(f);
-			}
-			return r.normalized;
 		}
 
 		Vector3 CalculateFaceNormal(List<Vertex> f)

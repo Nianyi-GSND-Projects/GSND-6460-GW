@@ -2,7 +2,7 @@ Shader "Culture Miniature/Planet Terrain" {
 		Properties {
 				[Header(Mesh)][Space]
 				baseRadius ("Base radius", Range(0, 1000)) = 500
-				subdivisionIteration ("Subdivision iteration", Range(2, 6)) = 5
+				subdivisionLevel ("Subdivision level", Range(2, 6)) = 5
 
 				[Header(General)][Space]
 				metallic ("Metallic", Range(0, 1)) = 0
@@ -39,7 +39,7 @@ Shader "Culture Miniature/Planet Terrain" {
 				/* Properties */
 
 				float baseRadius;
-				float subdivisionIteration;
+				float subdivisionLevel;
 
 				float metallic;
 				float smoothness;
@@ -144,8 +144,8 @@ Shader "Culture Miniature/Planet Terrain" {
 					SampleHeight_Local(heightMap, visualPos, terrain);
 					float isBorder = step(1 - IN.centralness, 1 - borderRatio);
 					if(useBakedLaplacian < 0.5)
-						terrain.laplacian = CalculateHeightLaplacianLayered_Local(heightMap, terrain, (int)subdivisionIteration + 1);
-					terrain.gradient = CalculateHeightGradient_Geo(heightMap, Local2Geo(visualPos), subdivisionIteration);
+						terrain.laplacian = CalculateHeightLaplacianLayered_Local(heightMap, terrain, (int)subdivisionLevel + 1);
+					terrain.gradient = CalculateHeightGradient_Geo(heightMap, Local2Geo(visualPos), subdivisionLevel);
 
 					/* Output */
 					o.Albedo = lerp(borderColor, tileBaseColor, isBorder);

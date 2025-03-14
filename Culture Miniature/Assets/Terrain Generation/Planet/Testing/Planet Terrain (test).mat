@@ -102,6 +102,7 @@ Material:
     - radius: 500
     - smoothness: 0
     - subdivisionIteration: 5
+    - subdivisionLevel: 5
     - terrainHeightScale: 20
     - tilePower: 0
     - useBakedLaplacian: 0

@@ -6,22 +6,58 @@ namespace CultureMiniature
 {
 	public partial class Planet
 	{
-		Mesh GenerateTerrainMesh()
+		ProceduralMesh pm;
+		public bool HasPm => pm != null;
+
+		void RegeneratePlanetMeshFromPM()
 		{
-			ProceduralMesh pm = CreateIcosahedron();
-			for(int i = 0; i < subdivisionIteration; ++i)
-				pm.Subdivide();
-			pm.Dualize();
+			if(!HasPm)
+			{
+				Debug.LogWarning("Trying to update planet mesh while their is no active PM!");
+				return;
+			}
+			ProceduralMesh copy = new(pm);
+			copy.Triangularize();
+			copy.CalculateNormals();
+			UpdatePlanetMesh(copy.CreateMesh());
+		}
+
+		public void CreatePlanetMesh()
+		{
+			pm = CreateIcosahedron();
+			RegeneratePlanetMeshFromPM();
+		}
+
+		public void SubdividePlanetMesh()
+		{
+			pm.Subdivide();
 			foreach(var v in pm.vertices)
 			{
 				v.position = v.position.normalized;
+			}
+			++subdivisionLevel;
+			RegeneratePlanetMeshFromPM();
+		}
+
+		public void DualizePlanetMesh()
+		{
+			pm.Dualize();
+			RegeneratePlanetMeshFromPM();
+		}
+
+		public void ColorizePlanetMesh()
+		{
+			foreach(var v in pm.vertices)
+			{
 				v.uv = new(Mathf.Atan2(v.position.z, v.position.x), Mathf.Asin(v.position.y));
 				v.color = Color.black;
 			}
-			pm.Triangularize();
-			pm.CalculateNormals();
-			var mesh = pm.CreateMesh();
-			return mesh;
+			RegeneratePlanetMeshFromPM();
+		}
+
+		public void FinalizePlanetMesh()
+		{
+			pm = null;
 		}
 
 		static ProceduralMesh CreateIcosahedron()
