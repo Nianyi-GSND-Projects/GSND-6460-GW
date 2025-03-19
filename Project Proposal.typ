@@ -1,40 +1,64 @@
-# Project Proposal
+#let projectname = [Culture Miniature];
+#let groupname = [GSND Abstract Workshop];
 
-## Team Info
+#set par(linebreaks: "optimized");
 
-### Name
+#{
+	set align(center);
+	par[
+		#text(size: 20pt, weight: "bold")[
+			Project Proposal for _#(projectname)_
+		]
+	];
+	v(-1em);
+	par[_#(groupname)_];
+}
 
-_GSND Abstract Workshop_ (GSND 抽象工作室)
+#{
+	set align(center);
+	show table.cell.where(y: 0): set text(weight: "bold");
+	table(
+		stroke: none,
+		columns: 3,
+		table.hline(stroke: 1pt),
+		table.header[Name][NUID][Role],
+		table.hline(stroke: 0.5pt),
+		[Nianyi Wang], [002306100], [Technical artist],
+		[Yichi Zhang], [002306795], [Client developer],
+		[Zhuowen Song], [002345844], [Mechanism designer],
+		table.hline(stroke: 1pt),
+	);
+}
 
-### Members
+#show heading.where(level: 1): set align(center);
+#show heading.where(level: 1): set block(inset: (top: 0.2em, bottom: 0.5em));
 
-| Name | NUID | Role |
-| - | - | - |
-| Nianyi Wang | 002306100 | Technical artist |
-| Yichi Zhang | 002306795 | Client developer |
-| Zhuowen Song | 002345844 | Mechanism designer |
+= Quick Info
 
-## Project Info
+#{
+	set align(center);
+	show table.cell.where(x: 0): set text(weight: "bold");
+	table(
+		columns: 2,
+		stroke: 0.5pt,
+		align: left,
+		[Project name], [#projectname],
+		[Group name], [#groupname],
+		[Type], [PCG demo],
+	);
+}
 
-### Name
-
-_Culture Miniature_
-
-### Type
-
-PCG demo
-
-### One-sentence Summary
+= One-sentence Summary
 
 Simulation of the evolution of the civilization of a fictional intellectual species on a fictional planet.
 
-### Theme
+= Theme
 
 All of the planet's mesh, terrain and the cultures of the civilization will be procedurally generated.
 To match the _Where Physical Meets Digital_ theme, physics-based terrain formation algorithm like iterative water erosion will be applied after the initial noise-based terrain height map is out.
 We will try to use every method we can find to make the terrain look more realistic.
 
-### Vision
+= Vision
 
 In the expected final prototype, the audience could see the formation of the planet, the appearance of every early culture, their expansion and collision, and how the world evolves to a global society which mimics the modern world.
 
@@ -51,7 +75,7 @@ We would like our audience to have the following experiences:
 	Those videos are stupid and time-wasting, yet many bored netizens are willing to place a mental bet on "which ball would last to the last second".
 	We hope that our audience would develop a similar belongingness to one of the fictional civilizations while watching the simulation.
 
-### Scope
+= Scope
 
 - A standard set of savegames UI: "New world", "Save/Load", etc.
 - At the beginning of each run, play an animation of the world creation.
@@ -60,13 +84,14 @@ We would like our audience to have the following experiences:
 	The audience will only play the role of an observer of the world.
 - To achieve the belonging experience, we'll probably implement a functionality that allows the audience to follow/keep track of a civilization (and give invisible buffs to it, dank psychology lol).
 
-### Approaches
+= Approaches
 
 - We will likely only use Unity for this project.
+
 - We lack artists in our team, either for visual or acoustic expression.
 	Any help/guidance on these aspects would be appreciated.
 
-### Timeline
+= Timeline
 
 - Mar 21: Project proposal
 
@@ -90,11 +115,13 @@ We would like our audience to have the following experiences:
 
 	Finishing & presentation.
 
-### Division of Work
+= Division of Work
 
-- Yichi will be in charge of developing the client-side logics, such as civilization development and user interfaces.
-- Zhuowen will be in charge of designing the mechanism for civilization development, i.e. how the cultures will interact with each other, what exact actions can they do, how will they be displayed on the map.
+- _Yichi_ will be in charge of developing the client-side logics, such as civilization development and user interfaces.
+
+- _Zhuowen_ will be in charge of designing the mechanism for civilization development, i.e. how the cultures will interact with each other, what exact actions can they do, how will they be displayed on the map.
 	He will write a mechanism document.
-- Nianyi will be in charge of developing the visual presentation of the in-game elements, mostly including the planet generation stuffs, terrain modification algorithm and shader tricks.
+
+- _Nianyi_ will be in charge of developing the visual presentation of the in-game elements, mostly including the planet generation stuffs, terrain modification algorithm and shader tricks.
 	After this part of the job is done, he will move on to join in the client-side works.
 	He will also make the materials for presentation/showcasing purposes.
