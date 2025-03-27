@@ -151,7 +151,7 @@ Light:
   m_Type: 1
   m_Shape: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 1
+  m_Intensity: 0.8
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -230,7 +230,7 @@ GameObject:
   - component: {fileID: 703954786}
   - component: {fileID: 703954787}
   m_Layer: 0
-  m_Name: Dummy Planet
+  m_Name: Planet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -271,7 +271,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3a0aa7eafe097524dac6e6b6545821d1, type: 2}
+  - {fileID: 10302, guid: 0000000000000000f000000000000000, type: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -334,6 +334,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f1ef99b97d16584098ebed162503513, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  radius: 500
+  debugSubdivisionLevel: 5
+  debugHeightMap: {fileID: 2800000, guid: c84beefe8657b62478f3522e875fe5d8, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

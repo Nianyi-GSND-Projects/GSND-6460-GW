@@ -1,24 +1,28 @@
 Shader "Culture Miniature/Planet Terrain" {
 		Properties {
+				[Header(Mesh)][Space]
+				baseRadius ("Base radius", Range(0, 1000)) = 500
+				subdivisionLevel ("Subdivision level", Range(2, 6)) = 5
+
 				[Header(General)][Space]
-				metallic ("Metallic", Range(0, 1)) = 0.1
-				smoothness ("Smoothness", Range(0, 1)) = 0.4
+				metallic ("Metallic", Range(0, 1)) = 0
+				smoothness ("Smoothness", Range(0, 1)) = 0
 
 				[Header(Tile)][Space]
 				tileBaseColor ("Tile base color", Color) = (0.5, 0.5, 0.5, 1)
-				tileHighlightColor ("Tile highlight color", Color) = (1, 1, 1, 1)
-				tilePower ("Tile power", Range(-3, 3)) = 0
 
 				[Header(Border)][Space]
 				borderRatio ("Border Ratio", Range(0, 0.5)) = 0.05
 				borderColor ("Border Color", Color) = (0.0, 0.0, 0.0, 1)
 
-				[Header(Terrain)][Space]
-				baseRadius ("Base radius", Range(0, 1000)) = 500
-				[NoScaleOffset] terrainMap ("Terrain map", Cube) = "gray" {}
-				terrainHeightScale ("Terrain height scale", Range(0, 20)) = 10
+				[Header(Height map)][Space]
+				[NoScaleOffset] heightMap ("Height map", 2D) = "gray" {}
+				heightScale ("Terrain height scale", Range(0, 20)) = 10
 				[MaterialToggle] useBumpMapping ("Use bump-mapping", Float) = 1
 				[Int] bumpMappingIteration ("Bump-mapping iteration", Range(1, 10)) = 7
+				[MaterialToggle] useBakedLaplacian ("Use baked Laplacian", Float) = 0
+				laplacianStrength ("Laplacian strength", Range(0, 1)) = 0.01
+				normalStrength ("Normal strength", Range(0, 1)) = 1
 		}
 		SubShader {
 				Tags {
@@ -30,8 +34,12 @@ Shader "Culture Miniature/Planet Terrain" {
 				#pragma surface SurfaceProgram Standard fullforwardshadows vertex:VertexProgram
 				#pragma target 4.0
 				#include "UnityCG.cginc"
+				#include "./Common Functions.hlsl"
 
 				/* Properties */
+
+				float baseRadius;
+				float subdivisionLevel;
 
 				float metallic;
 				float smoothness;
@@ -43,11 +51,13 @@ Shader "Culture Miniature/Planet Terrain" {
 				float borderRatio;
 				float4 borderColor;
 
-				float baseRadius;
-				UNITY_DECLARE_TEXCUBE(terrainMap);
-				float terrainHeightScale;
+				sampler2D heightMap;
+				float heightScale;
 				float useBumpMapping;
 				float bumpMappingIteration;
+				float useBakedLaplacian;
+				float laplacianStrength;
+				float normalStrength;
 
 				/* Structs */
 
@@ -62,8 +72,8 @@ Shader "Culture Miniature/Planet Terrain" {
 				/* Auxiliary functions */
 
 				/** Get height from a cubemap sample. */
-				float GetHeight(float4 info) {
-					return info.b - 0.5;
+				float GetAltitude(float4 info) {
+					return 2 * (info.b - 0.5);
 				}
 
 				/** Calculate the offset caused by bump-mapping. */
@@ -76,17 +86,21 @@ Shader "Culture Miniature/Planet Terrain" {
 				/* Vertex program */
 
 				void VertexProgram(inout appdata_full v, out Input o) {
+					UNITY_INITIALIZE_OUTPUT(Input, o);
+
+					TerrainInfo terrain;
+					SampleHeight_Local(heightMap, v.vertex.xyz, terrain);
+
 					float radius = baseRadius;
-					float altitude = GetHeight(UNITY_SAMPLE_TEXCUBE_LOD(terrainMap, v.vertex.xyz, 0));
-					radius += altitude * terrainHeightScale;
+					radius += terrain.altitude * heightScale;
 					float3 planetPos = o.planetPos = v.vertex.xyz = v.vertex.xyz * (radius / baseRadius);
 					float3 normalizedPos = normalize(planetPos);
 
 					o.geographicalPos.x = atan2(normalizedPos.z, normalizedPos.x);
-					o.geographicalPos.y = altitude;
+					o.geographicalPos.y = terrain.altitude;
 					o.geographicalPos.z = atan2(normalizedPos.y, length(normalizedPos.zx));
 
-					// TODO: Update the normal to match the tweaked shape.
+					// Normal is warpped later in the surface program.
 					o.meshNormal = v.normal;
 					o.centralness = v.color.r;
 				}
@@ -107,7 +121,7 @@ Shader "Culture Miniature/Planet Terrain" {
 
 				void SurfaceProgram(Input IN, inout SurfaceOutputStandard o) {
 					/* Pre-process */
-					float terrainScale = terrainHeightScale / baseRadius;
+					float terrainScale = heightScale / baseRadius;
 
 					/* Bump mapping */
 					float3 visualPos = IN.planetPos;
@@ -116,7 +130,9 @@ Shader "Culture Miniature/Planet Terrain" {
 					else {
 						float step = pow(0.9, bumpMappingIteration);
 						for(int i = 0; i < bumpMappingIteration; ++i) {
-							float bump = GetHeight(UNITY_SAMPLE_TEXCUBE(terrainMap, visualPos));
+							TerrainInfo terrain;
+							SampleHeight_Local(heightMap, visualPos, terrain);
+							float bump = terrain.altitude;
 							bump -= IN.geographicalPos.y;
 							float3 viewDirObj = normalize(ObjSpaceViewDir(float4(IN.meshNormal, 1)));
 							visualPos += step * BumpMap(visualPos, viewDirObj, IN.meshNormal, bump * terrainScale);
@@ -124,14 +140,21 @@ Shader "Culture Miniature/Planet Terrain" {
 					}
 
 					/* Key properties */
-					float height01 = GetHeight(UNITY_SAMPLE_TEXCUBE(terrainMap, visualPos)) + 0.5;
-					float borderness = step(1 - IN.centralness, 1 - borderRatio);
+					TerrainInfo terrain;
+					SampleHeight_Local(heightMap, visualPos, terrain);
+					float isBorder = step(1 - IN.centralness, 1 - borderRatio);
+					if(useBakedLaplacian < 0.5)
+						terrain.laplacian = CalculateHeightLaplacianLayered_Local(heightMap, terrain, (int)subdivisionLevel + 1);
+					terrain.gradient = CalculateHeightGradient_Geo(heightMap, Local2Geo(visualPos), subdivisionLevel);
 
 					/* Output */
-					o.Albedo = lerp(borderColor, lerp(tileBaseColor, tileHighlightColor, pow(height01, exp(tilePower))), borderness);
+					o.Albedo = lerp(borderColor, tileBaseColor, isBorder);
+					// o.Albedo = float3(terrain.gradient, 1);
+					o.Normal = CalculateTangentSpaceNormal(terrain, normalStrength);
 					o.Metallic = metallic;
 					o.Smoothness = smoothness;
-					o.Occlusion = clamp(0, 1, height01 * 2);
+					o.Occlusion = 1 + clamp(-terrain.laplacian * laplacianStrength, -1, 1);
+					// o.Occlusion = 1;  // DEBUG
 					o.Alpha = 1;
 				}
 				ENDCG
