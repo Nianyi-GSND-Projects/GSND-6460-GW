@@ -247,6 +247,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mainCamera: {fileID: 940650248}
   planet: {fileID: 703954787}
+  pcLatitude: 15
+  pcRotationSpeed: 15
+  pcRelativeRadius: 3
 --- !u!4 &570381184
 Transform:
   m_ObjectHideFlags: 0

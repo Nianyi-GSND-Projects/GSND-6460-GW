@@ -6,23 +6,22 @@ namespace CultureMiniature
 	public class PlanetCameraController : CameraController
 	{
 		#region Component references
-#if UNITY_EDITOR
-		new
-#endif
-		private Camera camera;
 		protected Planet Planet => GameManager.Instance.Planet;
 		#endregion
 
 		#region Unity life cycle
-		protected void Start()
-		{
-			camera = GetComponent<Camera>();
-		}
-
 		protected void Update()
 		{
 			UpdateOrbit();
 		}
+		#endregion
+
+		#region Interfaces
+		private Vector3 position;
+		private Quaternion rotation;
+
+		public override Vector3 Position => Planet.transform.localToWorldMatrix.MultiplyPoint(position) / Planet.Radius;
+		public override Quaternion Orientation => rotation * Planet.transform.localToWorldMatrix.rotation;
 		#endregion
 
 		#region Camera configs
@@ -39,24 +38,29 @@ namespace CultureMiniature
 
 		void UpdateOrbit()
 		{
+			CalculateOrbit(out Vector3 normalizedLocal, out Vector3 northTangent, out Vector3 lookAtPoint, out Vector3 cameraOffset);
+
+			position = lookAtPoint + cameraOffset;
+			Vector3 upVector = horizontalDistanceRatio == 0 ? northTangent : normalizedLocal;
+			rotation = Quaternion.LookRotation(-cameraOffset, upVector);
+		}
+
+		void CalculateOrbit(out Vector3 normalizedLocal, out Vector3 northTangent, out Vector3 lookAtPoint, out Vector3 cameraOffset)
+		{
 			// 聚焦点投影到单位球面上的位置。
-			Vector3 normalizedLocal = new(Mathf.Sin(longitude * Mathf.Deg2Rad), 0, Mathf.Cos(longitude * Mathf.Deg2Rad));
+			normalizedLocal = new(Mathf.Sin(longitude * Mathf.Deg2Rad), 0, Mathf.Cos(longitude * Mathf.Deg2Rad));
 			normalizedLocal *= Mathf.Cos(latitude * Mathf.Deg2Rad);
 			normalizedLocal.y = Mathf.Sin(latitude * Mathf.Deg2Rad);
 
 			// 聚焦点在局部空间中的实际位置。
-			Vector3 lookAtPoint = normalizedLocal * (Planet.Radius + altitude);
+			lookAtPoint = normalizedLocal * Planet.Radius;
 
-			Vector3 northTangent = Vector3.ProjectOnPlane(Vector3.up, normalizedLocal).normalized;
+			northTangent = Vector3.ProjectOnPlane(Vector3.up, normalizedLocal).normalized;
 			Vector3 westTangent = Vector3.Cross(northTangent, normalizedLocal);
-			Vector3 cameraOffset = Mathf.Cos(-direction * Mathf.Deg2Rad) * northTangent + Mathf.Sin(-direction * Mathf.Deg2Rad) * westTangent;
+			cameraOffset = Mathf.Cos(direction * Mathf.Deg2Rad) * northTangent + Mathf.Sin(direction * Mathf.Deg2Rad) * westTangent;
 			cameraOffset *= horizontalDistanceRatio;
 			cameraOffset += normalizedLocal;
 			cameraOffset *= altitude;
-
-			// 赋值相机属性。
-			camera.transform.position = lookAtPoint + cameraOffset;
-			camera.transform.rotation = Quaternion.LookRotation(-cameraOffset, normalizedLocal);
 		}
 		#endregion
 	}

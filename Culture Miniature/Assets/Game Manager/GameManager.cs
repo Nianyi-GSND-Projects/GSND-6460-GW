@@ -15,6 +15,7 @@ namespace CultureMiniature
 		#endregion
 
 		#region Component references
+		[Header("Componenr references")]
 		[SerializeField] private MainCamera mainCamera;
 		[SerializeField] private Planet planet;
 		public Planet Planet => planet;
@@ -27,9 +28,21 @@ namespace CultureMiniature
 		}
 		#endregion
 
+		#region Fields
+		[Header("Fields")]
+
+		[Header("Planet creation")]
+		[SerializeField][Range(-90, 90)] private float pcLatitude = 15;
+		[SerializeField][Min(0)] private float pcRotationSpeed = 45;
+		[SerializeField][Min(0)] private float pcRelativeRadius = 4;
+		#endregion
+
+		#region Life cycle
 		IEnumerator Main()
 		{
 			yield return new WaitForEndOfFrame();
+
+			StartCoroutine(nameof(PCRotation));
 
 			float standardInterval = 0.5f;
 			yield return new WaitForSeconds(standardInterval);
@@ -49,6 +62,29 @@ namespace CultureMiniature
 			Debug.Log("Colorized");
 			planet.FinalizeMesh();
 			Debug.Log("Finalized");
+
+			StopCoroutine(nameof(PCRotation));
 		}
+
+		/// <summary>星球创建时的旋转动画控制。</summary>
+		IEnumerator PCRotation()
+		{
+			var pc = mainCamera.planetCamera;
+
+			// Set up configs.
+			pc.horizontalDistanceRatio = 0;
+			pc.longitude = 0;
+			pc.latitude = pcLatitude;
+			pc.altitude = planet.Radius * (pcRelativeRadius - 1);
+			pc.direction = 0;
+
+			// Roll the animation.
+			for(float previous = Time.time, now; ; previous = now) {
+				yield return new WaitForEndOfFrame();
+				float dt = (now = Time.time) - previous;
+				pc.longitude += dt * pcRotationSpeed;
+			}
+		}
+		#endregion
 	}
 }
