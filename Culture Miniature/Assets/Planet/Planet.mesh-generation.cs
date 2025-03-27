@@ -7,16 +7,16 @@ namespace CultureMiniature
 	public partial class Planet
 	{
 		ProceduralMesh pm;
-		public bool HasPm => pm != null;
 
 		void RegeneratePlanetMeshFromPM()
 		{
-			if(!HasPm)
-			{
-				Debug.LogWarning("Trying to update planet mesh while their is no active PM!");
-				return;
-			}
 			ProceduralMesh copy = new(pm);
+			copy.Dualize();
+			foreach(var v in copy.vertices)
+			{
+				v.uv = new(Mathf.Atan2(v.position.z, v.position.x), Mathf.Asin(v.position.y));
+				v.color = Color.black;
+			}
 			copy.Triangularize();
 			copy.CalculateNormals();
 			UpdatePlanetMesh(copy.CreateMesh());
@@ -36,22 +36,6 @@ namespace CultureMiniature
 				v.position = v.position.normalized;
 			}
 			++subdivisionLevel;
-			RegeneratePlanetMeshFromPM();
-		}
-
-		public void DualizeMesh()
-		{
-			pm.Dualize();
-			RegeneratePlanetMeshFromPM();
-		}
-
-		public void ColorizeMesh()
-		{
-			foreach(var v in pm.vertices)
-			{
-				v.uv = new(Mathf.Atan2(v.position.z, v.position.x), Mathf.Asin(v.position.y));
-				v.color = Color.black;
-			}
 			RegeneratePlanetMeshFromPM();
 		}
 

@@ -44,24 +44,15 @@ namespace CultureMiniature
 
 			StartCoroutine(nameof(PCRotation));
 
-			float standardInterval = 0.5f;
-			yield return new WaitForSeconds(standardInterval);
+			float standardInterval = 1f;
 			planet.CreateMesh();
-			Debug.Log("Created");
 			for(int i = 0; i < planet.debugSubdivisionLevel; ++i)
 			{
 				yield return new WaitForSeconds(standardInterval);
 				planet.SubdivideMesh();
-				Debug.Log($"Subbed #{i}");
 			}
 			yield return new WaitForSeconds(standardInterval);
-			planet.DualizeMesh();
-			Debug.Log("Dualized");
-			yield return new WaitForSeconds(standardInterval);
-			planet.ColorizeMesh();
-			Debug.Log("Colorized");
 			planet.FinalizeMesh();
-			Debug.Log("Finalized");
 
 			StopCoroutine(nameof(PCRotation));
 		}
