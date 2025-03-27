@@ -5,9 +5,19 @@ namespace CultureMiniature
 {
 	public class GameManager : MonoBehaviour
 	{
+		#region Singleton
+		private static GameManager instance;
+		public static GameManager Instance => instance;
+		protected void Awake()
+		{
+			instance = this;
+		}
+		#endregion
+
 		#region Component references
-		[SerializeField] private Camera mainCamera;
+		[SerializeField] private MainCamera mainCamera;
 		[SerializeField] private Planet planet;
+		public Planet Planet => planet;
 		#endregion
 
 		#region Unity life cycle
