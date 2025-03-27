@@ -13,7 +13,14 @@ Shader "Culture Miniature/Planet Terrain" {
 
 				[Header(Border)][Space]
 				borderRatio ("Border Ratio", Range(0, 0.5)) = 0.05
-				borderColor ("Border Color", Color) = (0.0, 0.0, 0.0, 1)
+				borderBaseColor ("Border Base Color", Color) = (0.0, 0.0, 0.0, 1)
+				borderFocusedColor ("Border Focused Color", Color) = (1.0, 1.0, 1.0, 1)
+
+				[Header(Focus)][Space]
+				focusRadius ("Focus Radius", Float) = 100
+				[MaterialToggle] useFocus ("Use Focus", Float) = 0
+				focusPosition ("Focus Position", Vector) = (0, 0, 0, 0)
+				focusGradientPower ("Focus Gradient Power", Float) = 0.5
 
 				[Header(Height map)][Space]
 				[NoScaleOffset] heightMap ("Height map", 2D) = "gray" {}
@@ -49,7 +56,13 @@ Shader "Culture Miniature/Planet Terrain" {
 				float tilePower;
 
 				float borderRatio;
-				float4 borderColor;
+				float4 borderBaseColor;
+				float4 borderFocusedColor;
+				float focusGradientPower;
+
+				float focusRadius;
+				float useFocus;
+				float4 focusPosition;
 
 				sampler2D heightMap;
 				float heightScale;
@@ -143,18 +156,18 @@ Shader "Culture Miniature/Planet Terrain" {
 					TerrainInfo terrain;
 					SampleHeight_Local(heightMap, visualPos, terrain);
 					float isBorder = step(1 - IN.centralness, 1 - borderRatio);
+					float focusedness = 1 - clamp(distance(IN.planetPos * baseRadius, focusPosition) / focusRadius, 0, 1);
+					float3 borderColor = lerp(borderBaseColor, borderFocusedColor, pow(focusedness, focusGradientPower));
 					if(useBakedLaplacian < 0.5)
 						terrain.laplacian = CalculateHeightLaplacianLayered_Local(heightMap, terrain, (int)subdivisionLevel + 1);
 					terrain.gradient = CalculateHeightGradient_Geo(heightMap, Local2Geo(visualPos), subdivisionLevel);
 
 					/* Output */
 					o.Albedo = lerp(borderColor, tileBaseColor, isBorder);
-					// o.Albedo = float3(terrain.gradient, 1);
 					o.Normal = CalculateTangentSpaceNormal(terrain, normalStrength);
 					o.Metallic = metallic;
 					o.Smoothness = smoothness;
 					o.Occlusion = 1 + clamp(-terrain.laplacian * laplacianStrength, -1, 1);
-					// o.Occlusion = 1;  // DEBUG
 					o.Alpha = 1;
 				}
 				ENDCG

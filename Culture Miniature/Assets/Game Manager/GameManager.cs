@@ -26,6 +26,11 @@ namespace CultureMiniature
 		{
 			StartCoroutine(nameof(Main));
 		}
+
+		protected void Update()
+		{
+			UpdatePlanetFocus();
+		}
 		#endregion
 
 		#region Fields
@@ -70,11 +75,27 @@ namespace CultureMiniature
 			pc.direction = 0;
 
 			// Roll the animation.
-			for(float previous = Time.time, now; ; previous = now) {
+			for(float previous = Time.time, now; ; previous = now)
+			{
 				yield return new WaitForEndOfFrame();
 				float dt = (now = Time.time) - previous;
 				pc.longitude += dt * pcRotationSpeed;
 			}
+		}
+
+		void UpdatePlanetFocus()
+		{
+			var mousePosition = Input.mousePosition;
+			if(!float.IsNormal(mousePosition.sqrMagnitude))
+				return;
+			Ray ray = mainCamera.Camera.ScreenPointToRay(mousePosition);
+			if(!Physics.Raycast(ray, out var hit, float.PositiveInfinity, Planet.LayerMask))
+			{
+				Planet.UseFocus = false;
+				return;
+			}
+			Planet.UseFocus = true;
+			Planet.FocusPosition = Planet.transform.worldToLocalMatrix.MultiplyPoint(hit.point) * Planet.Radius;
 		}
 		#endregion
 	}

@@ -9,6 +9,19 @@ namespace CultureMiniature
 	[RequireComponent(typeof(SphereCollider))]
 	public partial class Planet : MonoBehaviour
 	{
+		#region Constants
+		private static int layerMask;
+		public static int LayerMask
+		{
+			get
+			{
+				if(layerMask == 0)
+					layerMask = UnityEngine.LayerMask.GetMask("Planet");
+				return layerMask;
+			}
+		}
+		#endregion
+
 		#region Planet geometry
 		[SerializeField] private float radius = 500;
 		public float Radius
@@ -117,6 +130,28 @@ namespace CultureMiniature
 			GetComponent<MeshFilter>().sharedMesh = null;
 			Destroy(planetMesh);
 			planetMesh = null;
+		}
+		#endregion
+
+		#region Focus
+		public bool UseFocus
+		{
+			set
+			{
+				if(!terrainMat)
+					return;
+				terrainMat.SetFloat("useFocus", value ? 1 : 0);
+			}
+		}
+
+		public Vector3 FocusPosition
+		{
+			set
+			{
+				if(!terrainMat)
+					return;
+				terrainMat.SetVector("focusPosition", value);
+			}
 		}
 		#endregion
 	}

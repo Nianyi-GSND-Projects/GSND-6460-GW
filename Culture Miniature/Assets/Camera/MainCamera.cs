@@ -12,6 +12,7 @@ namespace CultureMiniature
 		new
 #endif
 		private Camera camera;
+		public Camera Camera => camera;
 
 		protected void Start()
 		{
