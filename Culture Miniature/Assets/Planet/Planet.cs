@@ -34,7 +34,7 @@ namespace CultureMiniature
 				terrainMat.SetFloat("baseRadius", radius);
 			}
 		}
-		[SerializeField][Range(0, 5)] private int debugSubdivisionLevel = 3;
+		[Range(0, 5)] public int debugSubdivisionLevel = 3;
 		private Mesh planetMesh;
 		private int subdivisionLevel;
 		public int SubdivisionLevel => subdivisionLevel;

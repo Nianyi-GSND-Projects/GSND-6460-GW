@@ -27,16 +27,16 @@ namespace CultureMiniature
 			EditorGUILayout.BeginHorizontal();
 			GUI.enabled = Application.isPlaying;
 			if(GUILayout.Button("Create"))
-				Planet.CreatePlanetMesh();
+				Planet.CreateMesh();
 			GUI.enabled &= Planet.HasPm;
 			if(GUILayout.Button("Subdivide"))
-				Planet.SubdividePlanetMesh();
+				Planet.SubdivideMesh();
 			if(GUILayout.Button("Dualize"))
-				Planet.DualizePlanetMesh();
+				Planet.DualizeMesh();
 			if(GUILayout.Button("Colorize"))
-				Planet.ColorizePlanetMesh();
+				Planet.ColorizeMesh();
 			if(GUILayout.Button("Finalize"))
-				Planet.FinalizePlanetMesh();
+				Planet.FinalizeMesh();
 			EditorGUILayout.EndHorizontal();
 			GUI.enabled = oldEnabled;
 		}

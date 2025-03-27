@@ -22,13 +22,13 @@ namespace CultureMiniature
 			UpdatePlanetMesh(copy.CreateMesh());
 		}
 
-		public void CreatePlanetMesh()
+		public void CreateMesh()
 		{
 			pm = CreateIcosahedron();
 			RegeneratePlanetMeshFromPM();
 		}
 
-		public void SubdividePlanetMesh()
+		public void SubdivideMesh()
 		{
 			pm.Subdivide();
 			foreach(var v in pm.vertices)
@@ -39,13 +39,13 @@ namespace CultureMiniature
 			RegeneratePlanetMeshFromPM();
 		}
 
-		public void DualizePlanetMesh()
+		public void DualizeMesh()
 		{
 			pm.Dualize();
 			RegeneratePlanetMeshFromPM();
 		}
 
-		public void ColorizePlanetMesh()
+		public void ColorizeMesh()
 		{
 			foreach(var v in pm.vertices)
 			{
@@ -55,7 +55,7 @@ namespace CultureMiniature
 			RegeneratePlanetMeshFromPM();
 		}
 
-		public void FinalizePlanetMesh()
+		public void FinalizeMesh()
 		{
 			pm = null;
 		}
