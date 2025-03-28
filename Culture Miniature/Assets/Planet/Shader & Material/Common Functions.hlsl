@@ -29,10 +29,10 @@ struct TerrainInfo {
 /* Coordinate conversion */
 
 float2 Geo2Uv(in float2 geo) {
-	return geo * float2(INV_PI, INV_PI * 2);
+	return geo * float2(INV_PI / 2, INV_PI) + float2(0.5, 0.5);
 }
 float2 Uv2Geo(in float2 uv) {
-	return uv * float2(PI, PI / 2);
+	return (uv - float2(0.5, 0.5)) * float2(PI * 2, PI);
 }
 
 float2 Local2Geo(in float3 local) {
@@ -94,7 +94,6 @@ void SampleHeight_Geo(in sampler2D heightMap, in float2 geo, out TerrainInfo inf
 	info.altitude = ExtractHeight(col);
 	info.gradient = col.rg;
 	info.laplacian = col.b;
-	info.laplacian = 0;  // DEBUG
 
 	info.normal = Geo2Local(geo);
 	info.tangent = FindTangent(info.normal);
@@ -152,6 +151,7 @@ float2 CalculateHeightGradient_Geo(in sampler2D heightMap, in float2 geo, in flo
 }
 
 float3 CalculateTangentSpaceNormal(in TerrainInfo origin, in float strength) {
+	// TODO: Incorrect. Needs to be transformed into the tangent space.
 	return -normalize(float3(origin.gradient * strength, -1));
 }
 

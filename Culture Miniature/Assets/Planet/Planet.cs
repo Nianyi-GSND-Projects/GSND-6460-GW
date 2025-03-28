@@ -66,27 +66,14 @@ namespace CultureMiniature
 
 		#region Terrain map
 		const string terrainShaderName = "Culture Miniature/Planet Terrain";
-		[SerializeField] private Texture debugHeightMap;
 		private RenderTexture heightMap;
 		void CreateHeightMap()
 		{
-			heightMap = new(new RenderTextureDescriptor
-			{
-				width = 2048,
-				height = 1024,
-				colorFormat = RenderTextureFormat.ARGB32,
-				useMipMap = false,
-				dimension = UnityEngine.Rendering.TextureDimension.Tex2D,
-				volumeDepth = 1,
-				msaaSamples = 1,
-			})
-			{
-				wrapMode = TextureWrapMode.Repeat
-			};
+			heightMap = GenerateHeightMap();
 		}
 		void DestroyHeightMap()
 		{
-			Destroy(heightMap);
+			RenderTexture.ReleaseTemporary(heightMap);
 			heightMap = null;
 		}
 		#endregion
@@ -111,9 +98,6 @@ namespace CultureMiniature
 		protected void Start()
 		{
 			CreateHeightMap();
-#if DEBUG
-			Graphics.Blit(debugHeightMap, heightMap);
-#endif
 			EnsureTerrainMat();
 			Radius = Radius;
 

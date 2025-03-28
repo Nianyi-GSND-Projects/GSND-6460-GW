@@ -340,7 +340,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   radius: 500
   debugSubdivisionLevel: 3
-  debugHeightMap: {fileID: 2800000, guid: c84beefe8657b62478f3522e875fe5d8, type: 3}
+  HeightmapComputer: {fileID: 7200000, guid: 25f225184c3542d478c341d84a59df0f, type: 3}
 --- !u!1 &940650243
 GameObject:
   m_ObjectHideFlags: 0

@@ -11,8 +11,7 @@ void CSMain (uint3 id : SV_DispatchThreadID,uint3 groupID : SV_GroupID)
     float2 uv = float2(pixelCoords*1.0f+0.5f)/2048.0f;
 
     float Qua_PI = atan(1);
-  //  float2 geo = (uv-float2(0.5f,0.5f)) * float2(Qua_PI*8,Qua_PI*4);
-    float2 geo = (uv) * float2(Qua_PI*8,Qua_PI*4);
+    float2 geo = (uv-float2(0.5f,0.5f)) * float2(Qua_PI*8,Qua_PI*4);
     float3 Pos = float3(cos(geo.x)*cos(geo.y)*0.5f+0.5f,sin(geo.y)*0.5f+0.5f,sin(geo.x)*cos(geo.y)*0.5f+0.5f);
     
     Pos *= (MapSize-1);

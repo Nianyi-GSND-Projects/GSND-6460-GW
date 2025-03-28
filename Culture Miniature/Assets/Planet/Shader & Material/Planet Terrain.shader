@@ -157,7 +157,7 @@ Shader "Culture Miniature/Planet Terrain" {
 					/* Key properties */
 					TerrainInfo terrain;
 					SampleHeight_Local(heightMap, visualPos, terrain);
-					float isBorder = step(1 - borderRatio, 1 - IN.centralness);
+					float isBorder = step(IN.centralness, borderRatio);
 					float focusedness = 1 - clamp(distance(IN.planetPos * baseRadius, focusPosition) / focusRadius, 0, 1);
 					float3 borderColor = lerp(borderBaseColor, borderFocusedColor, pow(focusedness, focusGradientPower));
 					if(useBakedLaplacian < 0.5)
