@@ -85,7 +85,7 @@ Material:
     - baseRadius: 500
     - borderRatio: 0.05
     - bumpMappingIteration: 10
-    - heightScale: 0
+    - heightScale: 16.44
     - laplacianStrength: 0.01
     - metallic: 0
     - normalStrength: 1

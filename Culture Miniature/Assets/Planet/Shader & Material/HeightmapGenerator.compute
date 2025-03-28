@@ -54,7 +54,7 @@ void CSMain (uint3 id : SV_DispatchThreadID,uint3 groupID : SV_GroupID)
     float noise;
     float mark = 0.0f;
     //if(Sub.x<tx||Sub.y<ty||Sub.z<tz) mark = 1.0f;
-    noise = lerp(lerp(lerp(dotProducts[0], dotProducts[1], tx), lerp(dotProducts[2], dotProducts[3], tx), ty), lerp(lerp(dotProducts[4], dotProducts[5], tx), lerp(dotProducts[6], dotProducts[7], tx), ty), tz);
-    Result[pixelCoords] = float4((noise*0.5f+0.5f),(noise*0.5f+0.5f),(noise*0.5f+0.5f),noise*0.5f+0.5f);
+    noise = lerp(lerp(lerp(dotProducts[0], dotProducts[1], tz), lerp(dotProducts[2], dotProducts[3], tz), ty), lerp(lerp(dotProducts[4], dotProducts[5], tz), lerp(dotProducts[6], dotProducts[7], tz), ty), tx);
+    Result[pixelCoords] = float4((noise*0.5f+0.5f),(noise*0.5f+0.5f),(noise*0.5f+0.5f),noise);
    // Result[pixelCoords] = float4(mark,0.0f,0.0f,0.0f);
 }
