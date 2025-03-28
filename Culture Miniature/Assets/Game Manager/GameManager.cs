@@ -56,10 +56,10 @@ namespace CultureMiniature
 				yield return new WaitForSeconds(standardInterval);
 				planet.SubdivideMesh();
 			}
-			yield return new WaitForSeconds(standardInterval);
 			planet.FinalizeMesh();
 
-			//StopCoroutine(nameof(PCRotation));
+			yield return new WaitForSeconds(standardInterval);
+			planet.CreateHeightMap();
 		}
 
 		/// <summary>星球创建时的旋转动画控制。</summary>

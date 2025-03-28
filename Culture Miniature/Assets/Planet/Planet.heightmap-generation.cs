@@ -6,7 +6,7 @@ namespace CultureMiniature
 	{
 		public ComputeShader HeightmapComputer;
 
-		public RenderTexture GenerateHeightMap()
+		private RenderTexture GenerateHeightMap()
 		{
 			int Size = 2048;
 			int PerlinGridCount = 16;
