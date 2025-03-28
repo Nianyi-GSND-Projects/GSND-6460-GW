@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Planet Terrain (test)
+  m_Name: Result Texture
   m_Shader: {fileID: 4800000, guid: 01fbbb5882136444abe0f16d112b78ef, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -45,7 +45,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 8400000, guid: 27e3bb0359678fc4d8e1297ed81bfa82, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -64,17 +64,8 @@ Material:
         m_Texture: {fileID: 2800000, guid: af52ea978019c50499e27a101d6c0532, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - terrainMap:
-        m_Texture: {fileID: 2800000, guid: c84beefe8657b62478f3522e875fe5d8, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - tmXP:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Amount: 0
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
@@ -93,24 +84,18 @@ Material:
     - _ZWrite: 1
     - baseRadius: 500
     - borderRatio: 0.05
-    - bumpMappingIteration: 7
-    - heightScale: 9.82
-    - laplacianSampleRadiusNLog: 1
-    - laplacianStrength: 0.04
+    - bumpMappingIteration: 10
+    - heightScale: 0
+    - laplacianStrength: 0.01
     - metallic: 0
     - normalStrength: 1
-    - radius: 500
     - smoothness: 0
-    - subdivisionIteration: 5
     - subdivisionLevel: 5
-    - terrainHeightScale: 20
-    - tilePower: 0
     - useBakedLaplacian: 0
     - useBumpMapping: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - borderColor: {r: 0, g: 0, b: 0, a: 1}
-    - tileBaseColor: {r: 1, g: 1, b: 1, a: 1}
-    - tileHighlightColor: {r: 1, g: 1, b: 1, a: 1}
+    - tileBaseColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_BuildTextureStacks: []
