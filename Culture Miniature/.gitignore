@@ -5,6 +5,11 @@
 /[Tt]emp
 /[Uu]serSettings
 
+# Project
+/Assets/Planet/Testing/Materials*
+/Assets/Planet/Testing/Output*
+/Assets/Planet/Testing/*.renderTexture*
+
 # Visual Studio
 /.vs
 /.vsconfig

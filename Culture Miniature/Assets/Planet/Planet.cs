@@ -9,6 +9,19 @@ namespace CultureMiniature
 	[RequireComponent(typeof(SphereCollider))]
 	public partial class Planet : MonoBehaviour
 	{
+		#region Constants
+		private static int layerMask;
+		public static int LayerMask
+		{
+			get
+			{
+				if(layerMask == 0)
+					layerMask = UnityEngine.LayerMask.GetMask("Planet");
+				return layerMask;
+			}
+		}
+		#endregion
+
 		#region Planet geometry
 		[SerializeField] private float radius = 500;
 		public float Radius
@@ -53,33 +66,27 @@ namespace CultureMiniature
 
 		#region Terrain map
 		const string terrainShaderName = "Culture Miniature/Planet Terrain";
-		[SerializeField] private Texture debugHeightMap;
 		private RenderTexture heightMap;
-		void CreateHeightMap()
+		public void CreateHeightMap()
 		{
-			heightMap = new(new RenderTextureDescriptor
-			{
-				width = 2048,
-				height = 1024,
-				colorFormat = RenderTextureFormat.ARGB32,
-				useMipMap = false,
-				dimension = UnityEngine.Rendering.TextureDimension.Tex2D,
-				volumeDepth = 1,
-				msaaSamples = 1,
-			})
-			{
-				wrapMode = TextureWrapMode.Repeat
-			};
+			if(heightMap)
+				return;
+			heightMap = GenerateHeightMap();
+			if(terrainMat)
+				terrainMat.SetTexture("heightMap", heightMap);
 		}
 		void DestroyHeightMap()
 		{
-			Destroy(heightMap);
+			if(!heightMap)
+				return;
+			RenderTexture.ReleaseTemporary(heightMap);
 			heightMap = null;
 		}
 		#endregion
 
 		#region Terrain rendering
 		private Material terrainMat;
+		public Material TerrainMat => terrainMat;
 		void EnsureTerrainMat()
 		{
 			if(terrainMat)
@@ -88,7 +95,8 @@ namespace CultureMiniature
 			{
 				name = "Planet Terrain (instance)",
 			};
-			terrainMat.SetTexture("heightMap", heightMap);
+			if(heightMap)
+				terrainMat.SetTexture("heightMap", heightMap);
 			var renderer = GetComponent<MeshRenderer>();
 			renderer.sharedMaterial = terrainMat;
 		}
@@ -97,10 +105,6 @@ namespace CultureMiniature
 		#region Untiy life cycle
 		protected void Start()
 		{
-			CreateHeightMap();
-#if DEBUG
-			Graphics.Blit(debugHeightMap, heightMap);
-#endif
 			EnsureTerrainMat();
 			Radius = Radius;
 
@@ -119,5 +123,28 @@ namespace CultureMiniature
 			planetMesh = null;
 		}
 		#endregion
+
+		#region Focus
+		public bool UseFocus
+		{
+			set
+			{
+				if(!terrainMat)
+					return;
+				terrainMat.SetFloat("useFocus", value ? 1 : 0);
+			}
+		}
+
+		public Vector3 FocusPosition
+		{
+			set
+			{
+				if(!terrainMat)
+					return;
+				terrainMat.SetVector("focusPosition", value);
+			}
+		}
+		#endregion
 	}
+
 }
