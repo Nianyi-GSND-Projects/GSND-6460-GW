@@ -1,0 +1,60 @@
+#pragma kernel CSMain
+
+StructuredBuffer<float3> PerlinBuffer;
+RWTexture2D<float4> Result;
+int MapSize;
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID,uint3 groupID : SV_GroupID)
+{
+   // uint2 pixelCoords = id.xy + groupID.xy * 8;
+    uint2 pixelCoords = id.xy;
+    float2 uv = float2(pixelCoords*1.0f+0.5f)/2048.0f;
+
+    float Qua_PI = atan(1);
+  //  float2 geo = (uv-float2(0.5f,0.5f)) * float2(Qua_PI*8,Qua_PI*4);
+    float2 geo = (uv) * float2(Qua_PI*8,Qua_PI*4);
+    float3 Pos = float3(cos(geo.x)*cos(geo.y)*0.5f+0.5f,sin(geo.y)*0.5f+0.5f,sin(geo.x)*cos(geo.y)*0.5f+0.5f);
+    
+    Pos *= (MapSize-1);
+    uint3 PerlinCoord = uint3(floor(Pos.xyz));
+    uint index[8];
+    index[0] = PerlinCoord.x*MapSize*MapSize + PerlinCoord.y*MapSize +PerlinCoord.z;
+    index[1] = PerlinCoord.x*MapSize*MapSize + PerlinCoord.y*MapSize +PerlinCoord.z+1;
+    index[2] = PerlinCoord.x*MapSize*MapSize + (PerlinCoord.y+1)*MapSize +PerlinCoord.z;
+    index[3] = PerlinCoord.x*MapSize*MapSize + (PerlinCoord.y+1)*MapSize +PerlinCoord.z+1;
+    index[4] = (PerlinCoord.x+1)*MapSize*MapSize + PerlinCoord.y*MapSize +PerlinCoord.z;
+    index[5] = (PerlinCoord.x+1)*MapSize*MapSize + PerlinCoord.y*MapSize +PerlinCoord.z+1;
+    index[6] = (PerlinCoord.x+1)*MapSize*MapSize + (PerlinCoord.y+1)*MapSize +PerlinCoord.z;
+    index[7] = (PerlinCoord.x+1)*MapSize*MapSize + (PerlinCoord.y+1)*MapSize +PerlinCoord.z+1;
+    
+    float3 PerlinPos = float3(PerlinCoord.xyz);
+    float3 offsets[8] = {Pos-PerlinPos-float3(0.0f,0.0f,0.0f),
+        Pos-PerlinPos-float3(0.0f,0.0f,1.0f),
+        Pos-PerlinPos-float3(0.0f,1.0f,0.0f),
+        Pos-PerlinPos-float3(0.0f,1.0f,1.0f),
+        Pos-PerlinPos-float3(1.0f,0.0f,0.0f),
+        Pos-PerlinPos-float3(1.0f,0.0f,1.0f),
+        Pos-PerlinPos-float3(1.0f,1.0f,0.0f),
+        Pos-PerlinPos-float3(1.0f,1.0f,1.0f)};
+    
+    float3 gradients[8];
+    float dotProducts[8];
+    for(int i = 0;i<8;i++)
+    {
+        gradients[i] = PerlinBuffer[index[i]];
+        dotProducts[i] = gradients[i].x*offsets[i].x+gradients[i].y*offsets[i].y+gradients[i].z*offsets[i].z;
+    }
+
+
+    float3 Sub = Pos-PerlinPos;
+    float tx = Sub.x*Sub.x*Sub.x*(Sub.x*(Sub.x*6.0f-15.0f)+10.0f);
+    float ty = Sub.y*Sub.y*Sub.y*(Sub.y*(Sub.y*6.0f-15.0f)+10.0f);
+    float tz = Sub.z*Sub.z*Sub.z*(Sub.z*(Sub.z*6.0f-15.0f)+10.0f);
+
+    float noise;
+    float mark = 0.0f;
+    //if(Sub.x<tx||Sub.y<ty||Sub.z<tz) mark = 1.0f;
+    noise = lerp(lerp(lerp(dotProducts[0], dotProducts[1], tz), lerp(dotProducts[2], dotProducts[3], tz), ty), lerp(lerp(dotProducts[4], dotProducts[5], tz), lerp(dotProducts[6], dotProducts[7], tz), ty), tx);
+    Result[pixelCoords] = float4((noise*0.5f+0.5f),(noise*0.5f+0.5f),(noise*0.5f+0.5f),noise);
+   // Result[pixelCoords] = float4(mark,0.0f,0.0f,0.0f);
+}
