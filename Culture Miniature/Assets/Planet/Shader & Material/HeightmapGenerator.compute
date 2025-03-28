@@ -8,7 +8,7 @@ void CSMain (uint3 id : SV_DispatchThreadID,uint3 groupID : SV_GroupID)
 {
    // uint2 pixelCoords = id.xy + groupID.xy * 8;
     uint2 pixelCoords = id.xy;
-    float2 uv = float2(pixelCoords)/2048.0f;
+    float2 uv = float2(pixelCoords*1.0f+0.5f)/2048.0f;
 
     float Qua_PI = atan(1);
   //  float2 geo = (uv-float2(0.5f,0.5f)) * float2(Qua_PI*8,Qua_PI*4);
@@ -55,6 +55,6 @@ void CSMain (uint3 id : SV_DispatchThreadID,uint3 groupID : SV_GroupID)
     float mark = 0.0f;
     //if(Sub.x<tx||Sub.y<ty||Sub.z<tz) mark = 1.0f;
     noise = lerp(lerp(lerp(dotProducts[0], dotProducts[1], tx), lerp(dotProducts[2], dotProducts[3], tx), ty), lerp(lerp(dotProducts[4], dotProducts[5], tx), lerp(dotProducts[6], dotProducts[7], tx), ty), tz);
-    Result[pixelCoords] = float4((noise*0.5f+0.5f),(noise*0.5f+0.5f),(noise*0.5f+0.5f),(noise*0.5f+0.5f));
+    Result[pixelCoords] = float4((noise*0.5f+0.5f),(noise*0.5f+0.5f),(noise*0.5f+0.5f),noise*0.5f+0.5f);
    // Result[pixelCoords] = float4(mark,0.0f,0.0f,0.0f);
 }

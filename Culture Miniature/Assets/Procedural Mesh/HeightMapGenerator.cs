@@ -13,7 +13,7 @@ namespace CultureMiniature
 		private int Size = 2048;
         private float Radius = 500;
 
-        private int PerlinGridCount = 50+1;
+        private int PerlinGridCount = 49;
         private Texture2D HeightMap;
         public ComputeShader HeightmapComputer;
         private ComputeBuffer PerlinBuffer;
