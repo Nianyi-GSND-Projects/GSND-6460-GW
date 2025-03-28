@@ -1,7 +1,13 @@
 /* Constant */
 
-static float HALF_PI = atan(1);
-static float INV_HALF_PI = 1 / HALF_PI;
+static float QUARTER_PI = atan(1);
+static float INV_QUARTER_PI = 1 / QUARTER_PI;
+
+static float PI = atan(1) * 4;
+static float INV_PI = 1 / PI;
+
+static float TAU = atan(1) * 8;
+static float INV_TAU = 1 / TAU;
 
 /* Aliases */
 
@@ -23,10 +29,10 @@ struct TerrainInfo {
 /* Coordinate conversion */
 
 float2 Geo2Uv(in float2 geo) {
-	return geo * float2(INV_HALF_PI * 0.25, INV_HALF_PI * 0.5);
+	return geo * float2(INV_PI, INV_PI * 2);
 }
 float2 Uv2Geo(in float2 uv) {
-	return uv * float2(HALF_PI * 4, HALF_PI * 2);
+	return uv * float2(PI, PI / 2);
 }
 
 float2 Local2Geo(in float3 local) {
@@ -118,7 +124,7 @@ float CalculateHeightLaplacianLayered_Local(in sampler2D heightMap, in TerrainIn
 
 	for(int i = 3; i < endingIteration; ++i) {
 		float scalar = pow(2, -i), localSum = 0;
-		float angularPixelSize = scalar * HALF_PI;
+		float angularPixelSize = scalar * QUARTER_PI;
 		localSum += CalculateHeightDD_Local(heightMap, origin, angularPixelSize);
 		localSum += CalculateHeightDD_Local(heightMap, rotated, angularPixelSize);
 		sum += scalar * localSum * angularPixelSize;
@@ -130,7 +136,7 @@ float CalculateHeightLaplacianLayered_Local(in sampler2D heightMap, in TerrainIn
 float2 CalculateHeightGradient_Geo(in sampler2D heightMap, in float2 geo, in float subdivisionLevel) {
 	float3 local = Geo2Local(geo);
 	float3 tangent = FindTangent(local), cotangent = cross(tangent, local);
-	float angularPixelSize = pow(2, -subdivisionLevel) * HALF_PI;
+	float angularPixelSize = pow(2, -subdivisionLevel) * QUARTER_PI;
 
 	TerrainInfo origin;
 	SampleHeight_Local(heightMap, local, origin);
