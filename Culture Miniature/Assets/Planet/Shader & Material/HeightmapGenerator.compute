@@ -16,8 +16,10 @@ void CSMain (uint3 id : SV_DispatchThreadID,uint3 groupID : SV_GroupID)
     float noise = 0.0f;
     int FullSize;
     FullSize = pow(2,Level)+1;
+    float amplitude = 1.0f;
+    float MaxValue = 0.0f;
     // Calculate current Frequency Perlin Noise
-    for(int Frequency = Level; Frequency > 1; Frequency--)
+    for(int Frequency = 2; Frequency <= Level; Frequency++)
     {
     int MapSize;
     MapSize = pow(2,Frequency)+1;
@@ -27,16 +29,15 @@ void CSMain (uint3 id : SV_DispatchThreadID,uint3 groupID : SV_GroupID)
     float3 PerlinPos;
     PerlinPos = float3(PerlinCoord.xyz);
     uint step = pow(2,Level - Frequency);
-    uint indexstep = step*MapSize;
     uint index[8];
-    index[0] = (PerlinCoord.x*indexstep*indexstep + PerlinCoord.y*indexstep +(PerlinCoord.z))*step;
-    index[1] = (PerlinCoord.x*indexstep*indexstep + PerlinCoord.y*indexstep +(PerlinCoord.z+1))*step;
-    index[2] = (PerlinCoord.x*indexstep*indexstep + (PerlinCoord.y+1)*indexstep +(PerlinCoord.z))*step;
-    index[3] = (PerlinCoord.x*indexstep*indexstep + (PerlinCoord.y+1)*indexstep +(PerlinCoord.z+1))*step;
-    index[4] = ((PerlinCoord.x+1)*indexstep*indexstep + PerlinCoord.y*indexstep +(PerlinCoord.z))*step;
-    index[5] = ((PerlinCoord.x+1)*indexstep*indexstep + PerlinCoord.y*indexstep +(PerlinCoord.z+1))*step;
-    index[6] = ((PerlinCoord.x+1)*indexstep*indexstep + (PerlinCoord.y+1)*indexstep +(PerlinCoord.z))*step;
-    index[7] = ((PerlinCoord.x+1)*indexstep*indexstep + (PerlinCoord.y+1)*indexstep +(PerlinCoord.z+1))*step;
+    index[0] = (PerlinCoord.x*FullSize*FullSize + PerlinCoord.y*FullSize +(PerlinCoord.z))*step;
+    index[1] = (PerlinCoord.x*FullSize*FullSize + PerlinCoord.y*FullSize +(PerlinCoord.z+1))*step;
+    index[2] = (PerlinCoord.x*FullSize*FullSize + (PerlinCoord.y+1)*FullSize +(PerlinCoord.z))*step;
+    index[3] = (PerlinCoord.x*FullSize*FullSize + (PerlinCoord.y+1)*FullSize +(PerlinCoord.z+1))*step;
+    index[4] = ((PerlinCoord.x+1)*FullSize*FullSize + PerlinCoord.y*FullSize +(PerlinCoord.z))*step;
+    index[5] = ((PerlinCoord.x+1)*FullSize*FullSize + PerlinCoord.y*FullSize +(PerlinCoord.z+1))*step;
+    index[6] = ((PerlinCoord.x+1)*FullSize*FullSize + (PerlinCoord.y+1)*FullSize +(PerlinCoord.z))*step;
+    index[7] = ((PerlinCoord.x+1)*FullSize*FullSize + (PerlinCoord.y+1)*FullSize +(PerlinCoord.z+1))*step;
     
     
     
@@ -64,12 +65,14 @@ void CSMain (uint3 id : SV_DispatchThreadID,uint3 groupID : SV_GroupID)
     float ty = Sub.y*Sub.y*Sub.y*(Sub.y*(Sub.y*6.0f-15.0f)+10.0f);
     float tz = Sub.z*Sub.z*Sub.z*(Sub.z*(Sub.z*6.0f-15.0f)+10.0f);
 
-    noise += pow(Scale,Frequency-1)*lerp(lerp(lerp(dotProducts[0], dotProducts[1], tz), lerp(dotProducts[2], dotProducts[3], tz), ty), lerp(lerp(dotProducts[4], dotProducts[5], tz), lerp(dotProducts[6], dotProducts[7], tz), ty), tx);
+    noise += amplitude*lerp(lerp(lerp(dotProducts[0], dotProducts[1], tz), lerp(dotProducts[2], dotProducts[3], tz), ty), lerp(lerp(dotProducts[4], dotProducts[5], tz), lerp(dotProducts[6], dotProducts[7], tz), ty), tx);
+    MaxValue += amplitude;
+    amplitude *= Scale;
     }
     
     //float mark = 0.0f;
     //if(Sub.x<tx||Sub.y<ty||Sub.z<tz) mark = 1.0f;
     
-    Result[pixelCoords] = float4((noise*0.5f+0.5f),(noise*0.5f+0.5f),(noise*0.5f+0.5f),(noise*0.5f+0.5f));
+    Result[pixelCoords] = float4((noise*0.5f+0.5f),(noise*0.5f+0.5f),(noise*0.5f+0.5f),(noise*0.5f+0.5f))/MaxValue;
     //Result[pixelCoords] = float4(noise,0.0f,0.0f,noise);
 }

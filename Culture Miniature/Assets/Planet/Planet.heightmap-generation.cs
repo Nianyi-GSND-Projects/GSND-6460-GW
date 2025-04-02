@@ -11,7 +11,7 @@ namespace CultureMiniature
 			int Size = 2048;
 			int Level = 7;
 			int PerlinGridCount;
-			float Scale = 0.75f;
+			float Scale = 0.5f;
 			PerlinGridCount = (int)Mathf.Round(Mathf.Pow(2,Level))+1;
 			Debug.Log(PerlinGridCount);
 			RenderTexture rt = RenderTexture.GetTemporary(2048, 2048, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
