@@ -1,5 +1,5 @@
-using UnityEngine;
 
+using UnityEngine;
 namespace CultureMiniature
 {
 	public partial class Planet
@@ -9,8 +9,11 @@ namespace CultureMiniature
 		private RenderTexture GenerateHeightMap()
 		{
 			int Size = 2048;
-			int PerlinGridCount = 16;
-
+			int Level = 7;
+			int PerlinGridCount;
+			float Scale = 0.75f;
+			PerlinGridCount = (int)Mathf.Round(Mathf.Pow(2,Level))+1;
+			Debug.Log(PerlinGridCount);
 			RenderTexture rt = RenderTexture.GetTemporary(2048, 2048, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
 			rt.enableRandomWrite = true;
 			rt.wrapModeU = TextureWrapMode.Repeat;
@@ -35,17 +38,24 @@ namespace CultureMiniature
 			var PerlinBuffer = new ComputeBuffer(PerlinGridCount * PerlinGridCount * PerlinGridCount, sizeof(float) * 3);
 			PerlinBuffer.SetData(Vector3ArrayTo1DArray(perlin));
 
+
 			int kernel = HeightmapComputer.FindKernel("CSMain");
 			HeightmapComputer.SetBuffer(kernel, "PerlinBuffer", PerlinBuffer);
 			HeightmapComputer.SetTexture(kernel, "Result", rt);
-			HeightmapComputer.SetInt("MapSize", PerlinGridCount);
+			HeightmapComputer.SetInt("Level", Level);
+			HeightmapComputer.SetFloat("Scale", Scale);
 			HeightmapComputer.Dispatch(kernel, Size / 8, Size / 8, 1);
+
 
 			PerlinBuffer.Release();
 
 			return rt;
 		}
 
+		private void GeneratePerlinNoise()
+		{
+
+		}
 		static float[] Vector3ArrayTo1DArray(Vector3[,,] source)
 		{
 			int width = source.GetLength(0);
