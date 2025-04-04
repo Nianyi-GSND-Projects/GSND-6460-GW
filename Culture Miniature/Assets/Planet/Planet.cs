@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
 
 namespace CultureMiniature
 {
@@ -23,6 +22,7 @@ namespace CultureMiniature
 		#endregion
 
 		#region Planet geometry
+		[Header("Geometry")]
 		[SerializeField] private float radius = 500;
 		public float Radius
 		{
@@ -64,16 +64,40 @@ namespace CultureMiniature
 		}
 		#endregion
 
-		#region Terrain map
+		#region Heightmap
+		[Header("Heightmap")]
+		[SerializeField] private int noiseSeed = 137;
 		const string terrainShaderName = "Culture Miniature/Planet Terrain";
 		private RenderTexture heightMap;
 		public void CreateHeightMap()
 		{
 			if(heightMap)
 				return;
-			heightMap = GenerateHeightMap();
+
+			heightMap = RenderTexture.GetTemporary(2048, 1024, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+			heightMap.enableRandomWrite = true;
+			heightMap.wrapModeU = TextureWrapMode.Repeat;
+			heightMap.wrapModeV = TextureWrapMode.Mirror;
+
 			if(terrainMat)
 				terrainMat.SetTexture("heightMap", heightMap);
+		}
+		[Range(1, 5)][SerializeField] private int maxNoiseLevel = 5;
+		[Range(0.1f, 0.9f)][SerializeField] private float noisePower = 0.5f;
+		public void LayerHeightMap(int level)
+		{
+			RenderTexture temp = RenderTexture.GetTemporary(heightMap.descriptor);
+			Graphics.Blit(heightMap, temp);
+			Material mat = new(Shader.Find("Culture Miniature/Generate Planet Heightmap"));
+			mat.SetTexture("_MainTex", temp);
+			float frequency = Mathf.Pow(2f, level + 2);
+			mat.SetFloat("frequency", frequency);
+			float amplitude = Mathf.Pow(noisePower, level + 1);
+			mat.SetFloat("amplitude", amplitude);
+			mat.SetFloat("seed", noiseSeed);
+			Graphics.Blit(temp, heightMap, mat);
+			Destroy(mat);
+			RenderTexture.ReleaseTemporary(temp);
 		}
 		void DestroyHeightMap()
 		{
@@ -105,6 +129,8 @@ namespace CultureMiniature
 		#region Untiy life cycle
 		protected void Start()
 		{
+			noiseSeed = (int)(0xffff * Random.value);
+
 			EnsureTerrainMat();
 			Radius = Radius;
 
@@ -142,6 +168,30 @@ namespace CultureMiniature
 				if(!terrainMat)
 					return;
 				terrainMat.SetVector("focusPosition", value);
+			}
+		}
+		#endregion
+
+		#region Generation
+		[Header("Generation")]
+		[Range(0, 1)] public float generationInterval = 1f;  // DEBUG
+		public IEnumerator GenerationCoroutine()
+		{
+			CreateMesh();
+			for(int i = 0; i < debugSubdivisionLevel; ++i)
+			{
+				yield return new WaitForSeconds(generationInterval);
+				SubdivideMesh();
+			}
+			FinalizeMesh();
+
+			yield return new WaitForSeconds(generationInterval);
+			CreateHeightMap();
+
+			for(int i = 0; i <= maxNoiseLevel; ++i)
+			{
+				yield return new WaitForSeconds(generationInterval);
+				LayerHeightMap(i);
 			}
 		}
 		#endregion

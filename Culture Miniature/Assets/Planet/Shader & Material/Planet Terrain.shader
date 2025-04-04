@@ -12,7 +12,7 @@ Shader "Culture Miniature/Planet Terrain" {
 				tileBaseColor ("Tile base color", Color) = (0.5, 0.5, 0.5, 1)
 
 				[Header(Border)][Space]
-				borderRatio ("Border Ratio", Range(0, 0.5)) = 0.05
+				borderRatio ("Border Ratio", Range(0, 0.5)) = 0.03
 				borderBaseColor ("Border Base Color", Color) = (0.0, 0.0, 0.0, 1)
 				borderFocusedColor ("Border Focused Color", Color) = (1.0, 1.0, 1.0, 1)
 				borderEmissionIntensity ("Border Emission Intensity", Range(0, 1)) = 0.1
@@ -25,7 +25,7 @@ Shader "Culture Miniature/Planet Terrain" {
 
 				[Header(Height map)][Space]
 				[NoScaleOffset] heightMap ("Height map", 2D) = "gray" {}
-				heightScale ("Terrain height scale", Range(0, 20)) = 10
+				heightScale ("Terrain height scale", Range(0, 100)) = 10
 				[MaterialToggle] useBumpMapping ("Use bump-mapping", Float) = 1
 				[Int] bumpMappingIteration ("Bump-mapping iteration", Range(1, 10)) = 7
 				[MaterialToggle] useBakedLaplacian ("Use baked Laplacian", Float) = 0

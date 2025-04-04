@@ -74,5 +74,6 @@ void CSMain (uint3 id : SV_DispatchThreadID,uint3 groupID : SV_GroupID)
     //if(Sub.x<tx||Sub.y<ty||Sub.z<tz) mark = 1.0f;
     
     Result[pixelCoords] = float4((noise*0.5f+0.5f),(noise*0.5f+0.5f),(noise*0.5f+0.5f),(noise*0.5f+0.5f))/MaxValue;
+    // Result[pixelCoords] = float4((noise*0.5f+0.5f),(noise*0.5f+0.5f),(noise*0.5f+0.5f),(noise*0.5f+0.5f));
     //Result[pixelCoords] = float4(noise,0.0f,0.0f,noise);
 }

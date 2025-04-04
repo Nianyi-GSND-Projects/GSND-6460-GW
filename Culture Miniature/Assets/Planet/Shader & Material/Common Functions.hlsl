@@ -1,3 +1,5 @@
+#pragma once
+
 /* Constant */
 
 static float QUARTER_PI = atan(1);
@@ -73,7 +75,7 @@ void RotateTerrainInfo(inout TerrainInfo source) {
 /* Height map */
 
 float ExtractHeight(in float4 col) {
-	return col.a * 2 - 1;
+	return col.a;
 }
 
 float SampleHeightSimple_Geo(in sampler2D heightMap, in float2 geo) {
