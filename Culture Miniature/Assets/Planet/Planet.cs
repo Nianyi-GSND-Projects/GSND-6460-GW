@@ -69,7 +69,7 @@ namespace CultureMiniature
 		[SerializeField] private int noiseSeed = 137;
 		const string terrainShaderName = "Culture Miniature/Planet Terrain";
 		private RenderTexture heightMap;
-		public void CreateHeightMap()
+		void CreateHeightMap()
 		{
 			if(heightMap)
 				return;
@@ -84,7 +84,7 @@ namespace CultureMiniature
 		}
 		[Range(1, 5)][SerializeField] private int maxNoiseLevel = 5;
 		[Range(0.1f, 0.9f)][SerializeField] private float noisePower = 0.5f;
-		public void LayerHeightMap(int level)
+		void LayerHeightMap(int level)
 		{
 			RenderTexture temp = RenderTexture.GetTemporary(heightMap.descriptor);
 			Graphics.Blit(heightMap, temp);
@@ -174,25 +174,54 @@ namespace CultureMiniature
 
 		#region Generation
 		[Header("Generation")]
-		[Range(0, 1)] public float generationInterval = 1f;  // DEBUG
+		[Range(0, 1)] public float generationDelay = 0.1f;
+		[Range(0, 5)] public float generationInterval = 1f;
 		public IEnumerator GenerationCoroutine()
 		{
+			yield return new WaitForSeconds(generationInterval);
+
+			PlayVFX(dirtEffect);
+			yield return new WaitForSeconds(generationDelay);
 			CreateMesh();
+			yield return new WaitForSeconds(generationInterval);
+
 			for(int i = 0; i < debugSubdivisionLevel; ++i)
 			{
-				yield return new WaitForSeconds(generationInterval);
+				PlayVFX(dirtEffect);
+				yield return new WaitForSeconds(generationDelay);
 				SubdivideMesh();
+				yield return new WaitForSeconds(generationInterval);
 			}
 			FinalizeMesh();
 
-			yield return new WaitForSeconds(generationInterval);
+			PlayVFX(dirtEffect);
+			yield return new WaitForSeconds(generationDelay);
 			CreateHeightMap();
+			yield return new WaitForSeconds(generationInterval);
 
 			for(int i = 0; i <= maxNoiseLevel; ++i)
 			{
-				yield return new WaitForSeconds(generationInterval);
+				PlayVFX(dirtEffect);
+				yield return new WaitForSeconds(generationDelay);
 				LayerHeightMap(i);
+				yield return new WaitForSeconds(generationInterval);
 			}
+		}
+		#endregion
+
+		#region VFX
+		[SerializeField] private ParticleSystem dirtEffect;
+
+		void PlayVFX(ParticleSystem ps)
+		{
+			StartCoroutine(PlayVFXCoroutine(ps));
+		}
+
+		IEnumerator PlayVFXCoroutine(ParticleSystem ps)
+		{
+			ps.Play();
+			yield return new WaitForSeconds(ps.main.duration);
+			ps.Stop();
 		}
 		#endregion
 	}
