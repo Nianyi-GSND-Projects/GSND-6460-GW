@@ -162,6 +162,10 @@ Shader "Culture Miniature/Planet Terrain" {
 						}
 					}
 
+					/* Center position */
+					float3 centerPos = normalize(IN.meshNormal);
+					visualPos = centerPos;
+
 					/* Key properties */
 					TerrainInfo terrain;
 					SampleHeight_Local(heightMap, visualPos, terrain);

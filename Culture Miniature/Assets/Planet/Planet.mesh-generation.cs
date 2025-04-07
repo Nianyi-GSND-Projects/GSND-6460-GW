@@ -18,6 +18,7 @@ namespace CultureMiniature
 				v.color = Color.black;
 			}
 			copy.Triangularize();
+			copy.ShadeFlat();
 			copy.CalculateNormals();
 			UpdatePlanetMesh(copy.CreateMesh());
 		}
