@@ -1,5 +1,6 @@
 Shader "Culture Miniature/Planet Terrain" {
 		Properties {
+
 				[Header(Mesh)][Space]
 				baseRadius ("Base radius", Range(0, 1000)) = 500
 				subdivisionLevel ("Subdivision level", Range(2, 6)) = 5
@@ -7,6 +8,9 @@ Shader "Culture Miniature/Planet Terrain" {
 				[Header(General)][Space]
 				metallic ("Metallic", Range(0, 1)) = 0
 				smoothness ("Smoothness", Range(0, 1)) = 0
+
+				[Header(Debug)][Space]
+				centralnessLerp ("Centralness Lerp", Range(0, 1)) = 0
 
 				[Header(Tile)][Space]
 				tileBaseColor ("Tile base color", Color) = (0.5, 0.5, 0.5, 1)
@@ -56,6 +60,8 @@ Shader "Culture Miniature/Planet Terrain" {
 
 				float metallic;
 				float smoothness;
+
+				float centralnessLerp;
 
 				float4 tileBaseColor;
 				float4 dirtColor;
@@ -164,7 +170,7 @@ Shader "Culture Miniature/Planet Terrain" {
 
 					/* Center position */
 					float3 centerPos = normalize(IN.meshNormal);
-					visualPos = centerPos;
+					visualPos = lerp(visualPos, centerPos, centralnessLerp);
 
 					/* Key properties */
 					TerrainInfo terrain;

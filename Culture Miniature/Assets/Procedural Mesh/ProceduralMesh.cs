@@ -215,5 +215,11 @@ namespace CultureMiniature
 			vertices = newVertices;
 			faces = newFaces;
 		}
+
+		public void Spherize()
+		{
+			foreach(var v in vertices)
+				v.position = v.position.normalized;
+		}
 	}
 }
