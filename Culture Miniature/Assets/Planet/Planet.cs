@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 namespace CultureMiniature
 {
@@ -108,6 +109,53 @@ namespace CultureMiniature
 		}
 		#endregion
 
+		#region Baking
+		protected void BakingTexture(string ShaderName,RenderTexture TargetTexture,Mesh mesh,Material material)
+		{
+
+			var shader = Shader.Find(ShaderName);
+			if (!shader) 
+			{
+    			Debug.LogError($"Shader \"{ShaderName}\" not found!");
+    			return;
+			}
+
+			if (material == null) material = new Material(shader);
+
+			RenderTexture temp = RenderTexture.active;
+			RenderTexture.active = TargetTexture;
+
+			GL.Clear(true,true,Color.black);
+			material.SetPass(0);
+			Graphics.DrawMeshNow(mesh,Matrix4x4.identity);
+			RenderTexture.active = temp;
+		}
+
+		#endregion
+
+		#region HexColor
+		RenderTexture HexColortex;
+		public RawImage testOutput;
+		void CreateHexColorMap()
+		{
+			if(HexColortex)
+				return;
+
+			HexColortex = new RenderTexture(2048, 1024, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+			HexColortex.enableRandomWrite = true;
+			HexColortex.Create();
+			
+			//HexColortex.wrapModeU = TextureWrapMode.Repeat;
+			//HexColortex.wrapModeV = TextureWrapMode.Mirror;
+			
+		}
+		void BakeHexColor()
+		{
+			BakingTexture("Culture Miniature/BakeVertexColor",HexColortex,planetMesh,null);
+			testOutput.texture = HexColortex;
+		}
+		#endregion
+
 		#region Terrain rendering
 		private Material terrainMat;
 		public Material TerrainMat => terrainMat;
@@ -149,6 +197,9 @@ namespace CultureMiniature
 			planetMesh = null;
 		}
 		#endregion
+
+		
+
 
 		#region Focus
 		public bool UseFocus
@@ -206,6 +257,14 @@ namespace CultureMiniature
 				LayerHeightMap(i);
 				yield return new WaitForSeconds(generationInterval);
 			}
+
+			yield return new WaitForSeconds(generationDelay);
+			CreateHexColorMap();
+			yield return new WaitForSeconds(generationInterval);
+
+			yield return new WaitForSeconds(generationDelay);
+			BakeHexColor();
+			yield return new WaitForSeconds(generationInterval);
 		}
 		#endregion
 
