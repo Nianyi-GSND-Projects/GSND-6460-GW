@@ -18,6 +18,7 @@ namespace CultureMiniature
 				v.color = Color.black;
 			}
 			copy.Triangularize();
+			copy.ShadeFlat();
 			copy.CalculateNormals();
 			UpdatePlanetMesh(copy.CreateMesh());
 		}
@@ -31,10 +32,7 @@ namespace CultureMiniature
 		public void SubdivideMesh()
 		{
 			pm.Subdivide();
-			foreach(var v in pm.vertices)
-			{
-				v.position = v.position.normalized;
-			}
+			pm.Spherize();
 			++subdivisionLevel;
 			RegeneratePlanetMeshFromPM();
 		}
