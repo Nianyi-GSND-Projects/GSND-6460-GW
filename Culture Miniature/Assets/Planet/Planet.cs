@@ -227,6 +227,7 @@ namespace CultureMiniature
 
 		#region Generation
 		[Header("Generation")]
+		[SerializeField] private bool shadeFlat = false;
 		[Range(0, 1)] public float generationDelay = 0.1f;
 		[Range(0, 5)] public float generationInterval = 1f;
 		public IEnumerator GenerationCoroutine()

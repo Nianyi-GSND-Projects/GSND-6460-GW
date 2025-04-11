@@ -18,7 +18,8 @@ namespace CultureMiniature
 				v.color = Color.black;
 			}
 			copy.Triangularize();
-			copy.ShadeFlat();
+			if(shadeFlat)
+				copy.ShadeFlat();
 			copy.CalculateNormals();
 			var mesh = copy.CreateMesh();
 			mesh.name = "Planet Mesh (instance)";
