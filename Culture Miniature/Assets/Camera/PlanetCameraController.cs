@@ -6,12 +6,19 @@ namespace CultureMiniature
 	{
 		#region Component references
 		protected Planet Planet => GameManager.Instance.Planet;
+		[SerializeField] private Camera mainCamera;
+		public Camera Camera => mainCamera;
 		#endregion
 
 		#region Unity life cycle
 		protected void Update()
 		{
 			UpdateOrbit();
+		}
+
+		protected void LateUpdate()
+		{
+			transform.SetPositionAndRotation(Position, Orientation);
 		}
 		#endregion
 

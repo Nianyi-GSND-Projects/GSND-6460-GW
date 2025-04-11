@@ -5180,7 +5180,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 914fd32e010a19249a4da50383dcc655, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainCamera: {fileID: 940650248}
+  planetCamera: {fileID: 940650249}
   planet: {fileID: 703954787}
   pcLatitude: 15
   pcRotationSpeed: 15
@@ -5342,10 +5342,9 @@ GameObject:
   m_Component:
   - component: {fileID: 940650246}
   - component: {fileID: 940650244}
-  - component: {fileID: 940650248}
   - component: {fileID: 940650249}
   m_Layer: 0
-  m_Name: Main Camera
+  m_Name: Planet Camera Controller
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5375,20 +5374,6 @@ Transform:
   - {fileID: 98746654}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &940650248
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 940650243}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 84ce7874b69b00d4b979f7119e9107a7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  planetCamera: {fileID: 940650249}
-  mainCam: {fileID: 98746655}
 --- !u!114 &940650249
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5401,6 +5386,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62f0fafd3ec844b4dbac8191b1d9075d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainCamera: {fileID: 98746655}
   longitude: 45
   latitude: 30
   altitude: 10
