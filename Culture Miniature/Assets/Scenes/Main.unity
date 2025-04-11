@@ -4970,7 +4970,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5480348471985582512, guid: 78ab46867fcecd54ea5cce3d34b01227, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -15
+      value: -5
       objectReference: {fileID: 0}
     - target: {fileID: 5480348471985582512, guid: 78ab46867fcecd54ea5cce3d34b01227, type: 3}
       propertyPath: m_LocalPosition.y
@@ -5225,7 +5225,7 @@ MonoBehaviour:
   screen: {fileID: 1218056152}
   planetCamera: {fileID: 940650249}
   planet: {fileID: 703954787}
-  useAnaglyph: 0
+  useAnaglyph: 1
   mainCam: {fileID: 296980451}
   anaglyphCams: {fileID: 481136144}
   pcLatitude: 15
@@ -5839,6 +5839,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 481136145}
     m_Modifications:
+    - target: {fileID: 663785850068443203, guid: 78ab46867fcecd54ea5cce3d34b01227, type: 3}
+      propertyPath: volumeTrigger
+      value: 
+      objectReference: {fileID: 98746654}
     - target: {fileID: 1714763197004240067, guid: 78ab46867fcecd54ea5cce3d34b01227, type: 3}
       propertyPath: material
       value: 
@@ -5849,7 +5853,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5480348471985582512, guid: 78ab46867fcecd54ea5cce3d34b01227, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 15
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 5480348471985582512, guid: 78ab46867fcecd54ea5cce3d34b01227, type: 3}
       propertyPath: m_LocalPosition.y

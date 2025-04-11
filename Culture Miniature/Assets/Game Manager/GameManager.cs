@@ -32,7 +32,7 @@ namespace CultureMiniature
 
 		public bool UseAnaglyph
 		{
-			get =>	useAnaglyph;
+			get => useAnaglyph;
 			set
 			{
 				mainCam.SetActive(!value);
@@ -56,8 +56,11 @@ namespace CultureMiniature
 
 		protected void OnValidate()
 		{
-			if(_oldUseAnaglyph != useAnaglyph)
-				UseAnaglyph = _oldUseAnaglyph = useAnaglyph;
+			if(Application.isPlaying)
+			{
+				if(_oldUseAnaglyph != useAnaglyph)
+					UseAnaglyph = _oldUseAnaglyph = useAnaglyph;
+			}
 		}
 		#endregion
 

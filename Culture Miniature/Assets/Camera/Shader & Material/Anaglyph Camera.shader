@@ -48,7 +48,11 @@ Shader "Culture Miniature/Anaglyph Camera"
 			fixed4 frag (v2f i) : SV_Target
 			{
 				float2 uv = i.uv;
-				return tex2D(_ScreenTex, uv) + tex2D(_MainTex, uv) * _Color;
+				float4 color = tex2D(_MainTex, uv);
+				// Formula for luminance.
+				// Source: https://stackoverflow.com/questions/596216/formula-to-determine-perceived-brightness-of-rgb-color
+				float value = dot(float3(0.299, 0.587, 0.114), color * color);
+				return tex2D(_ScreenTex, uv) + value * lerp(color, _Color, 0.8);
 			}
 			ENDCG
 		}
