@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 namespace CultureMiniature
 {
@@ -15,7 +16,9 @@ namespace CultureMiniature
 		#endregion
 
 		#region Component references
-		[Header("Componenr references")]
+		[Header("Component references")]
+		[SerializeField] private Screen screen;
+		public Screen Screen => screen;
 		[SerializeField] private PlanetCameraController planetCamera;
 		[SerializeField] private Planet planet;
 		public Planet Planet => planet;
@@ -45,7 +48,7 @@ namespace CultureMiniature
 		#region Life cycle
 		IEnumerator Main()
 		{
-			yield return new WaitForEndOfFrame();
+			yield return new WaitForSeconds(0f);
 
 			StartCoroutine(nameof(PCRotation));
 			StartCoroutine(Planet.GenerationCoroutine());
