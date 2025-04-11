@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace CultureMiniature
 {
-	public class GameManager : MonoBehaviour
+	public partial class GameManager : MonoBehaviour
 	{
 		#region Singleton
 		private static GameManager instance;
@@ -22,11 +22,11 @@ namespace CultureMiniature
 		[SerializeField] private PlanetCameraController planetCamera;
 		[SerializeField] private Planet planet;
 		public Planet Planet => planet;
+		public RotateConstantly sunRotation;
 		#endregion
 
 		#region Camera
 		[Header("Camera")]
-		private bool _oldUseAnaglyph = false;
 		[SerializeField] private bool useAnaglyph = false;
 		[SerializeField] private GameObject mainCam, anaglyphCams;
 
@@ -52,15 +52,6 @@ namespace CultureMiniature
 		protected void Update()
 		{
 			UpdatePlanetFocus();
-		}
-
-		protected void OnValidate()
-		{
-			if(Application.isPlaying)
-			{
-				if(_oldUseAnaglyph != useAnaglyph)
-					UseAnaglyph = _oldUseAnaglyph = useAnaglyph;
-			}
 		}
 		#endregion
 

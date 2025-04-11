@@ -24,16 +24,26 @@ namespace CultureMiniature
 			}
 		}
 
-		RenderTexture output;
+		RenderTexture outputTexture;
+		RenderTexture OutputTexture
+		{
+			get
+			{
+				if(outputTexture == null)
+				{
+					outputTexture = RenderTexture.GetTemporary(UnityEngine.Screen.width, UnityEngine.Screen.height);
+					Camera.targetTexture = outputTexture;
+				}
+				return outputTexture;
+			}
+		}
 
 		protected void Start()
 		{
 			if(material)
 				material = new Material(material);
 
-			output = RenderTexture.GetTemporary(UnityEngine.Screen.width, UnityEngine.Screen.height);
-			Camera.targetTexture = output;
-
+			var _ = OutputTexture;
 		}
 
 		protected void OnEnable()
@@ -51,14 +61,14 @@ namespace CultureMiniature
 			if(material)
 			{
 				material.SetTexture("_ScreenTex", Screen.OutputTexture);
-				RenderUtility.PostProcess(output, material);
+				RenderUtility.PostProcess(OutputTexture, material);
 			}
-			Graphics.Blit(output, target);
+			Graphics.Blit(OutputTexture, target);
 		}
 
 		protected void OnDestroy()
 		{
-			RenderTexture.ReleaseTemporary(output);
+			RenderTexture.ReleaseTemporary(OutputTexture);
 		}
 	}
 }

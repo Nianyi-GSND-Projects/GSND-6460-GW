@@ -5225,7 +5225,8 @@ MonoBehaviour:
   screen: {fileID: 1218056152}
   planetCamera: {fileID: 940650249}
   planet: {fileID: 703954787}
-  useAnaglyph: 1
+  sunRotation: {fileID: 1941308525}
+  useAnaglyph: 0
   mainCam: {fileID: 296980451}
   anaglyphCams: {fileID: 481136144}
   pcLatitude: 15
