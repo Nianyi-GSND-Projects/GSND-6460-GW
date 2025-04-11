@@ -24,15 +24,40 @@ namespace CultureMiniature
 		public Planet Planet => planet;
 		#endregion
 
+		#region Camera
+		[Header("Camera")]
+		private bool _oldUseAnaglyph = false;
+		[SerializeField] private bool useAnaglyph = false;
+		[SerializeField] private GameObject mainCam, anaglyphCams;
+
+		public bool UseAnaglyph
+		{
+			get =>	useAnaglyph;
+			set
+			{
+				mainCam.SetActive(!value);
+				anaglyphCams.SetActive(value);
+				useAnaglyph = value;
+			}
+		}
+		#endregion
+
 		#region Unity life cycle
 		protected void Start()
 		{
+			UseAnaglyph = UseAnaglyph;
 			StartCoroutine(nameof(Main));
 		}
 
 		protected void Update()
 		{
 			UpdatePlanetFocus();
+		}
+
+		protected void OnValidate()
+		{
+			if(_oldUseAnaglyph != useAnaglyph)
+				UseAnaglyph = _oldUseAnaglyph = useAnaglyph;
 		}
 		#endregion
 

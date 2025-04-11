@@ -34,7 +34,16 @@ namespace CultureMiniature
 			output = RenderTexture.GetTemporary(UnityEngine.Screen.width, UnityEngine.Screen.height);
 			Camera.targetTexture = output;
 
+		}
+
+		protected void OnEnable()
+		{
 			Screen.cameraStack.Add(this);
+		}
+
+		protected void OnDisable()
+		{
+			Screen.cameraStack.Remove(this);
 		}
 
 		public void Output(RenderTexture target)
@@ -49,7 +58,6 @@ namespace CultureMiniature
 
 		protected void OnDestroy()
 		{
-			GameManager.Instance.Screen.cameraStack.Remove(this);
 			RenderTexture.ReleaseTemporary(output);
 		}
 	}
