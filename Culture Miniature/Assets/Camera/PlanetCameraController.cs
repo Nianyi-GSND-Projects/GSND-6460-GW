@@ -2,7 +2,6 @@ using UnityEngine;
 
 namespace CultureMiniature
 {
-	[RequireComponent(typeof(Camera))]
 	public class PlanetCameraController : CameraController
 	{
 		#region Component references
