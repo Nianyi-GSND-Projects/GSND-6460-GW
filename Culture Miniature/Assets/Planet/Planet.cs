@@ -189,6 +189,8 @@ namespace CultureMiniature
 
 		protected void OnDestroy()
 		{
+			DestroyWater();
+
 			if(terrainMat)
 				Destroy(terrainMat);
 			DestroyHeightMap();
@@ -249,6 +251,11 @@ namespace CultureMiniature
 			CreateHeightMap();
 			yield return new WaitForSeconds(generationInterval);
 
+			PlayVFX(dirtEffect);
+			yield return new WaitForSeconds(generationDelay);
+			CreateWater();
+			yield return new WaitForSeconds(generationInterval);
+
 			for(int i = 0; i <= maxNoiseLevel; ++i)
 			{
 				PlayVFX(dirtEffect);
@@ -283,6 +290,26 @@ namespace CultureMiniature
 			ps.Play();
 			yield return new WaitForSeconds(ps.main.duration);
 			ps.Stop();
+		}
+		#endregion
+
+		#region Water
+		[SerializeField] private Material waterMat;
+		private GameObject water;
+
+		void CreateWater()
+		{
+			water = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+			water.transform.SetParent(transform, false);
+			water.GetComponent<MeshFilter>().sharedMesh = planetMesh;
+			water.GetComponent<Renderer>().sharedMaterial = waterMat;
+		}
+
+		void DestroyWater()
+		{
+			if(!water)
+				return;
+			Destroy(water);
 		}
 		#endregion
 	}

@@ -20,7 +20,9 @@ namespace CultureMiniature
 			copy.Triangularize();
 			copy.ShadeFlat();
 			copy.CalculateNormals();
-			UpdatePlanetMesh(copy.CreateMesh());
+			var mesh = copy.CreateMesh();
+			mesh.name = "Planet Mesh (instance)";
+			UpdatePlanetMesh(mesh);
 		}
 
 		public void CreateMesh()
