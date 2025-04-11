@@ -83,7 +83,8 @@ namespace CultureMiniature
 			if(terrainMat)
 				terrainMat.SetTexture("heightMap", heightMap);
 		}
-		[Range(1, 5)][SerializeField] private int maxNoiseLevel = 5;
+		[Range(1, 10)][SerializeField] private int maxNoiseLevel = 5;
+		[Range(0, 5)][SerializeField] private int noiseFrequencyLevel = 2;
 		[Range(0.1f, 0.9f)][SerializeField] private float noisePower = 0.5f;
 		void LayerHeightMap(int level)
 		{
@@ -91,9 +92,9 @@ namespace CultureMiniature
 			Graphics.Blit(heightMap, temp);
 			Material mat = new(Shader.Find("Culture Miniature/Generate Planet Heightmap"));
 			mat.SetTexture("_MainTex", temp);
-			float frequency = Mathf.Pow(2f, level + 2);
+			float frequency = Mathf.Pow(2f, level + noiseFrequencyLevel);
 			mat.SetFloat("frequency", frequency);
-			float amplitude = Mathf.Pow(noisePower, level + 1);
+			float amplitude = Mathf.Pow(noisePower, level);
 			mat.SetFloat("amplitude", amplitude);
 			mat.SetFloat("seed", noiseSeed);
 			Graphics.Blit(temp, heightMap, mat);

@@ -13,15 +13,16 @@ Shader "Culture Miniature/Planet Terrain" {
 				centralnessLerp ("Centralness Lerp", Range(0, 1)) = 0
 
 				[Header(Tile)][Space]
+				latitudePower ("Latitude power", Range(-2, 2)) = 0
 				tileBaseColor ("Tile base color", Color) = (0.5, 0.5, 0.5, 1)
 				dirtColor ("Dirt color", Color) = (0.8, 0.5, 0.2, 1)
 				grassColor ("Grass color", Color) = (0.5, 1, 0.2, 1)
-				grassHeight ("Grass height", Range(-1, 1)) = 0
+				grassHeight ("Grass height", Range(-1, 1)) = 0.6
 				iceColor ("Ice color", Color) = (0.9, 0.95, 1, 1)
-				iceHeight ("Ice height", Range(-1, 1)) = 0.3
+				iceHeight ("Ice height", Range(-1, 1)) = 0.8
 
 				[Header(Border)][Space]
-				borderRatio ("Border Ratio", Range(0, 0.5)) = 0.03
+				borderRatio ("Border Ratio", Range(0, 0.5)) = 0.02
 				borderBaseColor ("Border Base Color", Color) = (0.0, 0.0, 0.0, 1)
 				borderFocusedColor ("Border Focused Color", Color) = (1.0, 1.0, 1.0, 1)
 				borderEmissionIntensity ("Border Emission Intensity", Range(0, 1)) = 0.1
@@ -64,6 +65,7 @@ Shader "Culture Miniature/Planet Terrain" {
 				float centralnessLerp;
 
 				float4 tileBaseColor;
+				float latitudePower;
 				float4 dirtColor;
 				float4 grassColor;
 				float grassHeight;
@@ -181,10 +183,14 @@ Shader "Culture Miniature/Planet Terrain" {
 						terrain.laplacian = CalculateHeightLaplacianLayered_Local(heightMap, terrain, (int)subdivisionLevel + 1);
 					terrain.gradient = CalculateHeightGradient_Geo(heightMap, Local2Geo(visualPos), subdivisionLevel);
 
-					// Tile color.
+					// Terrain type.
+					float terrainValue = terrain.altitude;
+					terrainValue = lerp(terrainValue, 1, pow(abs(IN.planetPos.y), exp(latitudePower)));
+
+					// Terrain color.
 					float3 tileColor = grassColor;
-					tileColor = lerp(tileColor, dirtColor, step(grassHeight, terrain.altitude));
-					tileColor = lerp(tileColor, iceColor, step(iceHeight, terrain.altitude));
+					tileColor = lerp(tileColor, dirtColor, step(grassHeight, terrainValue));
+					tileColor = lerp(tileColor, iceColor, step(iceHeight, terrainValue));
 
 					// Border.
 					float isBorder = step(IN.centralness, borderRatio);

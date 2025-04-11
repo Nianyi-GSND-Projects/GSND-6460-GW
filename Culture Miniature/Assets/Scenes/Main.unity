@@ -5255,7 +5255,8 @@ MonoBehaviour:
   radius: 500
   debugSubdivisionLevel: 3
   noiseSeed: 137
-  maxNoiseLevel: 5
+  maxNoiseLevel: 6
+  noiseFrequencyLevel: 2
   noisePower: 0.5
   bakeHexColor: 0
   testOutput: {fileID: 0}
