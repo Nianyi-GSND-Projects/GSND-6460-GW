@@ -5257,9 +5257,10 @@ MonoBehaviour:
   noiseSeed: 137
   maxNoiseLevel: 5
   noisePower: 0.5
+  bakeHexColor: 0
   testOutput: {fileID: 0}
   generationDelay: 0.1
-  generationInterval: 2
+  generationInterval: 0
   dirtEffect: {fileID: 84872732}
 --- !u!1 &940650243
 GameObject:

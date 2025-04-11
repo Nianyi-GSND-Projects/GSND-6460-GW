@@ -110,24 +110,24 @@ namespace CultureMiniature
 		#endregion
 
 		#region Baking
-		protected void BakingTexture(string ShaderName,RenderTexture TargetTexture,Mesh mesh,Material material)
+		protected void BakingTexture(string ShaderName, RenderTexture TargetTexture, Mesh mesh, Material material)
 		{
 
 			var shader = Shader.Find(ShaderName);
-			if (!shader) 
+			if(!shader)
 			{
-    			Debug.LogError($"Shader \"{ShaderName}\" not found!");
-    			return;
+				Debug.LogError($"Shader \"{ShaderName}\" not found!");
+				return;
 			}
 
-			if (material == null) material = new Material(shader);
+			if(material == null) material = new Material(shader);
 
 			RenderTexture temp = RenderTexture.active;
 			RenderTexture.active = TargetTexture;
 
-			GL.Clear(true,true,Color.black);
+			GL.Clear(true, true, Color.black);
 			material.SetPass(0);
-			Graphics.DrawMeshNow(mesh,Matrix4x4.identity);
+			Graphics.DrawMeshNow(mesh, Matrix4x4.identity);
 			RenderTexture.active = temp;
 		}
 
@@ -135,6 +135,8 @@ namespace CultureMiniature
 
 		#region HexColor
 		RenderTexture HexColortex;
+		[Header("Hex color")]
+		[SerializeField] private bool bakeHexColor = false;
 		public RawImage testOutput;
 		void CreateHexColorMap()
 		{
@@ -144,14 +146,14 @@ namespace CultureMiniature
 			HexColortex = new RenderTexture(2048, 1024, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
 			HexColortex.enableRandomWrite = true;
 			HexColortex.Create();
-			
+
 			//HexColortex.wrapModeU = TextureWrapMode.Repeat;
 			//HexColortex.wrapModeV = TextureWrapMode.Mirror;
-			
+
 		}
 		void BakeHexColor()
 		{
-			BakingTexture("Culture Miniature/BakeVertexColor",HexColortex,planetMesh,null);
+			BakingTexture("Culture Miniature/BakeVertexColor", HexColortex, planetMesh, null);
 			testOutput.texture = HexColortex;
 		}
 		#endregion
@@ -197,9 +199,6 @@ namespace CultureMiniature
 			planetMesh = null;
 		}
 		#endregion
-
-		
-
 
 		#region Focus
 		public bool UseFocus
@@ -262,9 +261,12 @@ namespace CultureMiniature
 			CreateHexColorMap();
 			yield return new WaitForSeconds(generationInterval);
 
-			yield return new WaitForSeconds(generationDelay);
-			BakeHexColor();
-			yield return new WaitForSeconds(generationInterval);
+			if(bakeHexColor)
+			{
+				yield return new WaitForSeconds(generationDelay);
+				BakeHexColor();
+				yield return new WaitForSeconds(generationInterval);
+			}
 		}
 		#endregion
 
