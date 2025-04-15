@@ -253,7 +253,7 @@ namespace CultureMiniature
 			CreateHeightMap();
 			yield return new WaitForSeconds(generationInterval);
 
-			PlayVFX(dirtEffect);
+			PlayVFX(waterEffect);
 			yield return new WaitForSeconds(generationDelay);
 			CreateWater();
 			yield return new WaitForSeconds(generationInterval);
@@ -281,6 +281,7 @@ namespace CultureMiniature
 
 		#region VFX
 		[SerializeField] private ParticleSystem dirtEffect;
+		[SerializeField] private ParticleSystem waterEffect;
 
 		void PlayVFX(ParticleSystem ps)
 		{
@@ -302,6 +303,7 @@ namespace CultureMiniature
 		void CreateWater()
 		{
 			water = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+			water.name = "Water";
 			water.transform.SetParent(transform, false);
 			water.GetComponent<MeshFilter>().sharedMesh = planetMesh;
 			water.GetComponent<Renderer>().sharedMaterial = waterMat;
