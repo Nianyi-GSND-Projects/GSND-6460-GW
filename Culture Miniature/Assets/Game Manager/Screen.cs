@@ -30,7 +30,7 @@ namespace CultureMiniature
 			clearMat = new Material(Shader.Find("Culture Miniature/Clear Black"));
 		}
 
-		private List<CameraAgent> awaitingCamera = new();
+		private readonly List<CameraAgent> awaitingCamera = new();
 		public void OnCameraRendered(CameraAgent ca)
 		{
 			if(awaitingCamera.Count == 0)

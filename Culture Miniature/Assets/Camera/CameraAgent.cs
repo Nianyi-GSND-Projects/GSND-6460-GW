@@ -31,7 +31,7 @@ namespace CultureMiniature
 			{
 				if(outputTexture == null)
 				{
-					outputTexture = RenderTexture.GetTemporary(UnityEngine.Screen.width, UnityEngine.Screen.height);
+					outputTexture = RenderTexture.GetTemporary(Camera.pixelWidth, Camera.pixelHeight);
 					Camera.targetTexture = outputTexture;
 				}
 				return outputTexture;
