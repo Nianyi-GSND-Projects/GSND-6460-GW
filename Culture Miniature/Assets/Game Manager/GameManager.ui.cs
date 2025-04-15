@@ -8,6 +8,9 @@ namespace CultureMiniature
 
 		protected void OnGUI()
 		{
+			if(debug)
+				return;
+
 			ctrlBtnStyle ??= new(GUI.skin.button)
 			{
 				fontSize = 20,

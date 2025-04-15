@@ -16,6 +16,8 @@ namespace CultureMiniature
 		#endregion
 
 		#region Component references
+		[SerializeField] private bool debug = false;
+
 		[Header("Component references")]
 		[SerializeField] private Screen screen;
 		public Screen Screen => screen;
@@ -45,12 +47,16 @@ namespace CultureMiniature
 		#region Unity life cycle
 		protected void Start()
 		{
+			if(debug)
+				return;
 			UseAnaglyph = UseAnaglyph;
 			StartCoroutine(nameof(Main));
 		}
 
 		protected void Update()
 		{
+			if(debug)
+				return;
 			UpdatePlanetFocus();
 		}
 		#endregion

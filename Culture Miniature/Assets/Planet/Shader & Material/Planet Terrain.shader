@@ -47,6 +47,7 @@ Shader "Culture Miniature/Planet Terrain" {
 					"RenderType" = "Opaque"
 				}
 				LOD 200
+				Cull Back
 
 				CGPROGRAM
 				#pragma surface SurfaceProgram Standard fullforwardshadows vertex:VertexProgram
