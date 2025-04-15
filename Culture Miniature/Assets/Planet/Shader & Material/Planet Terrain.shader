@@ -13,8 +13,10 @@ Shader "Culture Miniature/Planet Terrain" {
 				centralnessLerp ("Centralness Lerp", Range(0, 1)) = 0
 
 				[Header(Tile)][Space]
-				latitudePower ("Latitude power", Range(-2, 2)) = 0
-				tileBaseColor ("Tile base color", Color) = (0.5, 0.5, 0.5, 1)
+				latitudePower ("Latitude power", Range(-2, 2)) = 0.5
+				tileBaseColor ("Tile base color", Color) = (0.8, 0.7, 0.3, 1)
+				sandHeight ("Sand height", Range(-1, 1)) = 0.2
+				sandColor ("Sand color", Color) = (1, 0.8, 0.5, 1)
 				dirtColor ("Dirt color", Color) = (0.8, 0.5, 0.2, 1)
 				grassColor ("Grass color", Color) = (0.5, 1, 0.2, 1)
 				grassHeight ("Grass height", Range(-1, 1)) = 0.6
@@ -67,6 +69,8 @@ Shader "Culture Miniature/Planet Terrain" {
 
 				float4 tileBaseColor;
 				float latitudePower;
+				float4 sandColor;
+				float sandHeight;
 				float4 dirtColor;
 				float4 grassColor;
 				float grassHeight;
@@ -189,7 +193,9 @@ Shader "Culture Miniature/Planet Terrain" {
 					terrainValue = lerp(terrainValue, 1, pow(abs(IN.planetPos.y), exp(latitudePower)));
 
 					// Terrain color.
-					float3 tileColor = grassColor;
+					float3 tileColor = tileBaseColor;
+					tileColor = lerp(tileColor, sandColor, step(0, terrainValue));
+					tileColor = lerp(tileColor, grassColor, step(sandHeight, terrainValue));
 					tileColor = lerp(tileColor, dirtColor, step(grassHeight, terrainValue));
 					tileColor = lerp(tileColor, iceColor, step(iceHeight, terrainValue));
 

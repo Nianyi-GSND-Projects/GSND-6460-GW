@@ -31,8 +31,7 @@ namespace CultureMiniature
 			{
 				if(outputTexture == null)
 				{
-					outputTexture = RenderTexture.GetTemporary(Camera.pixelWidth, Camera.pixelHeight);
-					outputTexture.depth = 16;
+					outputTexture = RenderTexture.GetTemporary(Camera.pixelWidth, Camera.pixelHeight, 16);
 					camera.depthTextureMode |= DepthTextureMode.Depth;
 					Camera.targetTexture = outputTexture;
 				}
