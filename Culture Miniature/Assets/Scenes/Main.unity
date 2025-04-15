@@ -5439,7 +5439,7 @@ MonoBehaviour:
   testOutput: {fileID: 0}
   shadeFlat: 0
   generationDelay: 0.1
-  generationInterval: 2
+  generationInterval: 0
   dirtEffect: {fileID: 84872732}
   waterMat: {fileID: 2100000, guid: 045a5a1c105062044b83c9c3a64fc06b, type: 2}
 --- !u!1 &940650243

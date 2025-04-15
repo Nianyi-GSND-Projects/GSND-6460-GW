@@ -39,16 +39,26 @@ Shader "Culture Miniature/Generate Planet Heightmap" {
 			float amplitude;
 			float seed;
 
+			float GradientBasedAttenuation(in float gradient) {
+				return 1 / (1 + 0.5 * gradient);
+			}
+
+			float3 ProjectOntoPlane(in float3 v, in float3 n) {
+				n = normalize(n);
+				return v - n * dot(v, n);
+			}
+
 			float4 FragmentProgram(v2f i) : SV_Target {
-				float v = tex2D(_MainTex, float2(i.uv)).a;
-				float3 local = Geo2Local(Uv2Geo(i.uv));
-				v += Perlin3D(
-					local,
-					frequency,
-					amplitude,
-					(uint)seed
-				);
-				return float4(1, 1, 1, 1) * v;
+				float2 geo = Uv2Geo(i.uv);
+				float3 local = Geo2Local(geo);
+
+				float oldValue = tex2D(_MainTex, float2(i.uv)).a;
+				float oldGradient = length(CalculateHeightGradient_Geo(_MainTex, geo, 7));
+				float newValue = Perlin3D(local, frequency, amplitude, (uint)seed);
+				float newGradient = length(ProjectOntoPlane(Perlin3D_Gradient(local, frequency, amplitude, (uint)seed), local));
+
+				float value = oldValue + newValue * GradientBasedAttenuation(oldGradient + newGradient);
+				return value * float4(1, 1, 1, 1);
 			}
 			ENDCG
 		}

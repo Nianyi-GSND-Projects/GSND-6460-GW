@@ -51,3 +51,13 @@ float Perlin3D(in float3 pos, in float frequency, in float amplitude, in uint se
 	pos += FAST_32_hash(float3(seed, seed + 71, seed + 59)).xyz;
 	return noise(pos) * amplitude;
 }
+
+float3 Perlin3D_Gradient(in float3 pos, in float frequency, in float amplitude, in uint seed) {
+	float d = 0.0001 * frequency;
+	float v = Perlin3D(pos, frequency, amplitude, seed);
+	return (1 / d) * float3(
+		Perlin3D(pos + float3(d, 0, 0), frequency, amplitude, seed) - v,
+		Perlin3D(pos + float3(0, d, 0), frequency, amplitude, seed) - v,
+		Perlin3D(pos + float3(0, 0, d), frequency, amplitude, seed) - v
+	);
+}
