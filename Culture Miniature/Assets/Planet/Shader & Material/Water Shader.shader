@@ -1,4 +1,4 @@
-Shader "Custom/PlanetWater"
+Shader "Culture Miniature/Planet Water"
 {
     Properties
     {
