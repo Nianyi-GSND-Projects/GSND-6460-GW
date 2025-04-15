@@ -56,6 +56,10 @@ namespace CultureMiniature
 			Screen.cameraStack.Remove(this);
 		}
 
+		protected void OnPostRender()
+		{
+			Screen.OnCameraRendered(this);
+		}
 		public void Output(RenderTexture target)
 		{
 			if(material)

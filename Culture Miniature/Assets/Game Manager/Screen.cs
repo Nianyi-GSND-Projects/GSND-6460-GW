@@ -30,16 +30,23 @@ namespace CultureMiniature
 			clearMat = new Material(Shader.Find("Culture Miniature/Clear Black"));
 		}
 
-		protected void Update()
+		private List<CameraAgent> awaitingCamera = new();
+		public void OnCameraRendered(CameraAgent ca)
+		{
+			if(awaitingCamera.Count == 0)
+			{
+				StartFrame();
+				awaitingCamera.Clear();
+				awaitingCamera.AddRange(cameraStack);
+			}
+			awaitingCamera.Remove(ca);
+
+			ca.Output(OutputTexture);
+		}
+		private void StartFrame()
 		{
 			if(clearBlack)
 				RenderUtility.PostProcess(OutputTexture, clearMat);
-			foreach(var ca in cameraStack)
-			{
-				if(!ca.isActiveAndEnabled)
-					continue;
-				ca.Output(OutputTexture);
-			}
 		}
 
 		protected void OnDestroy()
