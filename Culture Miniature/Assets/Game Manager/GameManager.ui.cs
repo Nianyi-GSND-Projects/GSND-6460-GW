@@ -8,6 +8,7 @@ namespace CultureMiniature
 
 		protected void OnGUI()
 		{
+			return;
 			if(debug)
 				return;
 

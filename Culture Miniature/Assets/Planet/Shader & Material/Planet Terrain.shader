@@ -206,7 +206,8 @@ Shader "Culture Miniature/Planet Terrain" {
 
 					/* Output */
 					o.Albedo = lerp(tileColor, borderColor, isBorder);
-					o.Emission = borderColor * isBorder * borderEmissionIntensity;
+					o.Albedo = float3(1, 1, 1) * (terrain.altitude * .5 + .5);  // DEBUG
+					// o.Emission = borderColor * isBorder * borderEmissionIntensity;
 					o.Normal = CalculateTangentSpaceNormal(terrain, normalStrength);
 					o.Metallic = metallic;
 					o.Smoothness = smoothness;

@@ -139,7 +139,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &84872731
 Transform:
   m_ObjectHideFlags: 0
@@ -5385,7 +5385,7 @@ MonoBehaviour:
   testOutput: {fileID: 0}
   shadeFlat: 0
   generationDelay: 0.1
-  generationInterval: 2
+  generationInterval: 0
   dirtEffect: {fileID: 84872732}
   waterEffect: {fileID: 1930064772}
   waterMat: {fileID: 2100000, guid: 045a5a1c105062044b83c9c3a64fc06b, type: 2}
@@ -5535,7 +5535,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1930064771
 Transform:
   m_ObjectHideFlags: 0

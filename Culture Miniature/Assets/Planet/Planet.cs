@@ -253,10 +253,10 @@ namespace CultureMiniature
 			CreateHeightMap();
 			yield return new WaitForSeconds(generationInterval);
 
-			PlayVFX(waterEffect);
-			yield return new WaitForSeconds(generationDelay);
-			CreateWater();
-			yield return new WaitForSeconds(generationInterval);
+			// PlayVFX(waterEffect);
+			// yield return new WaitForSeconds(generationDelay);
+			// CreateWater();
+			// yield return new WaitForSeconds(generationInterval);
 
 			for(int i = 0; i <= maxNoiseLevel; ++i)
 			{
