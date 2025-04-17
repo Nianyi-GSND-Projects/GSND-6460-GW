@@ -1,9 +1,10 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 namespace CultureMiniature
 {
-	public class GameManager : MonoBehaviour
+	public partial class GameManager : MonoBehaviour
 	{
 		#region Singleton
 		private static GameManager instance;
@@ -15,20 +16,47 @@ namespace CultureMiniature
 		#endregion
 
 		#region Component references
-		[Header("Componenr references")]
-		[SerializeField] private MainCamera mainCamera;
+		[SerializeField] private bool debug = false;
+
+		[Header("Component references")]
+		[SerializeField] private Screen screen;
+		public Screen Screen => screen;
+		[SerializeField] private PlanetCameraController planetCamera;
 		[SerializeField] private Planet planet;
 		public Planet Planet => planet;
+		public RotateConstantly sunRotation;
+		#endregion
+
+		#region Camera
+		[Header("Camera")]
+		[SerializeField] private bool useAnaglyph = false;
+		[SerializeField] private GameObject mainCam, anaglyphCams;
+
+		public bool UseAnaglyph
+		{
+			get => useAnaglyph;
+			set
+			{
+				mainCam.SetActive(!value);
+				anaglyphCams.SetActive(value);
+				useAnaglyph = value;
+			}
+		}
 		#endregion
 
 		#region Unity life cycle
 		protected void Start()
 		{
+			if(debug)
+				return;
+			UseAnaglyph = UseAnaglyph;
 			StartCoroutine(nameof(Main));
 		}
 
 		protected void Update()
 		{
+			if(debug)
+				return;
 			UpdatePlanetFocus();
 		}
 		#endregion
@@ -45,41 +73,28 @@ namespace CultureMiniature
 		#region Life cycle
 		IEnumerator Main()
 		{
-			yield return new WaitForEndOfFrame();
+			yield return new WaitForSeconds(0f);
 
 			StartCoroutine(nameof(PCRotation));
-
-			float standardInterval = 1f;
-			planet.CreateMesh();
-			for(int i = 0; i < planet.debugSubdivisionLevel; ++i)
-			{
-				yield return new WaitForSeconds(standardInterval);
-				planet.SubdivideMesh();
-			}
-			planet.FinalizeMesh();
-
-			yield return new WaitForSeconds(standardInterval);
-			planet.CreateHeightMap();
+			StartCoroutine(Planet.GenerationCoroutine());
 		}
 
 		/// <summary>星球创建时的旋转动画控制。</summary>
 		IEnumerator PCRotation()
 		{
-			var pc = mainCamera.planetCamera;
-
 			// Set up configs.
-			pc.horizontalDistanceRatio = 0;
-			pc.longitude = 0;
-			pc.latitude = pcLatitude;
-			pc.altitude = planet.Radius * (pcRelativeRadius - 1);
-			pc.direction = 0;
+			planetCamera.horizontalDistanceRatio = 0;
+			planetCamera.longitude = 0;
+			planetCamera.latitude = pcLatitude;
+			planetCamera.altitude = planet.Radius * (pcRelativeRadius - 1);
+			planetCamera.direction = 0;
 
 			// Roll the animation.
 			for(float previous = Time.time, now; ; previous = now)
 			{
 				yield return new WaitForEndOfFrame();
 				float dt = (now = Time.time) - previous;
-				pc.longitude += dt * pcRotationSpeed;
+				planetCamera.longitude += dt * pcRotationSpeed;
 			}
 		}
 
@@ -88,7 +103,7 @@ namespace CultureMiniature
 			var mousePosition = Input.mousePosition;
 			if(!float.IsNormal(mousePosition.sqrMagnitude))
 				return;
-			Ray ray = mainCamera.Camera.ScreenPointToRay(mousePosition);
+			Ray ray = planetCamera.Camera.ScreenPointToRay(mousePosition);
 			if(!Physics.Raycast(ray, out var hit, float.PositiveInfinity, Planet.LayerMask))
 			{
 				Planet.UseFocus = false;

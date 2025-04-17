@@ -12,6 +12,15 @@ namespace CultureMiniature
 			public Vector3 normal;
 			public Vector2 uv;
 			public Color color = Color.white;
+
+			public Vertex() { }
+			public Vertex(Vertex source)
+			{
+				position = source.position;
+				normal = source.normal;
+				uv = source.uv;
+				color = source.color;
+			}
 		}
 
 		public List<Vertex> vertices = new();
@@ -191,6 +200,26 @@ namespace CultureMiniature
 				for(int i = 0; i < f.Count; ++i)
 					faces.Add(new() { mid, f[i], f[(i + 1) % f.Count] });
 			}
+		}
+
+		public void ShadeFlat()
+		{
+			List<Vertex> newVertices = new();
+			List<List<Vertex>> newFaces = new();
+			foreach(var f in faces)
+			{
+				List<Vertex> newFace = f.Select(v => new Vertex(v)).ToList();
+				newVertices.AddRange(newFace);
+				newFaces.Add(newFace);
+			}
+			vertices = newVertices;
+			faces = newFaces;
+		}
+
+		public void Spherize()
+		{
+			foreach(var v in vertices)
+				v.position = v.position.normalized;
 		}
 	}
 }

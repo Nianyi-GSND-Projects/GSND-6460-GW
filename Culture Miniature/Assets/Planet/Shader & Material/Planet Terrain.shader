@@ -1,5 +1,6 @@
 Shader "Culture Miniature/Planet Terrain" {
 		Properties {
+
 				[Header(Mesh)][Space]
 				baseRadius ("Base radius", Range(0, 1000)) = 500
 				subdivisionLevel ("Subdivision level", Range(2, 6)) = 5
@@ -8,11 +9,22 @@ Shader "Culture Miniature/Planet Terrain" {
 				metallic ("Metallic", Range(0, 1)) = 0
 				smoothness ("Smoothness", Range(0, 1)) = 0
 
+				[Header(Debug)][Space]
+				centralnessLerp ("Centralness Lerp", Range(0, 1)) = 0
+
 				[Header(Tile)][Space]
-				tileBaseColor ("Tile base color", Color) = (0.5, 0.5, 0.5, 1)
+				latitudePower ("Latitude power", Range(-2, 2)) = 0.5
+				tileBaseColor ("Tile base color", Color) = (0.8, 0.7, 0.3, 1)
+				sandHeight ("Sand height", Range(-1, 1)) = 0.2
+				sandColor ("Sand color", Color) = (1, 0.8, 0.5, 1)
+				dirtColor ("Dirt color", Color) = (0.8, 0.5, 0.2, 1)
+				grassColor ("Grass color", Color) = (0.5, 1, 0.2, 1)
+				grassHeight ("Grass height", Range(-1, 1)) = 0.6
+				iceColor ("Ice color", Color) = (0.9, 0.95, 1, 1)
+				iceHeight ("Ice height", Range(-1, 1)) = 0.8
 
 				[Header(Border)][Space]
-				borderRatio ("Border Ratio", Range(0, 0.5)) = 0.05
+				borderRatio ("Border Ratio", Range(0, 0.5)) = 0.02
 				borderBaseColor ("Border Base Color", Color) = (0.0, 0.0, 0.0, 1)
 				borderFocusedColor ("Border Focused Color", Color) = (1.0, 1.0, 1.0, 1)
 				borderEmissionIntensity ("Border Emission Intensity", Range(0, 1)) = 0.1
@@ -25,18 +37,19 @@ Shader "Culture Miniature/Planet Terrain" {
 
 				[Header(Height map)][Space]
 				[NoScaleOffset] heightMap ("Height map", 2D) = "gray" {}
-				heightScale ("Terrain height scale", Range(0, 20)) = 10
+				heightScale ("Terrain height scale", Range(0, 100)) = 10
 				[MaterialToggle] useBumpMapping ("Use bump-mapping", Float) = 1
 				[Int] bumpMappingIteration ("Bump-mapping iteration", Range(1, 10)) = 7
 				[MaterialToggle] useBakedLaplacian ("Use baked Laplacian", Float) = 0
 				laplacianStrength ("Laplacian strength", Range(0, 1)) = 0.01
-				normalStrength ("Normal strength", Range(0, 1)) = 1
+				normalStrength ("Normal strength", Range(0, 4)) = 1
 		}
 		SubShader {
 				Tags {
 					"RenderType" = "Opaque"
 				}
 				LOD 200
+				Cull Back
 
 				CGPROGRAM
 				#pragma surface SurfaceProgram Standard fullforwardshadows vertex:VertexProgram
@@ -52,9 +65,17 @@ Shader "Culture Miniature/Planet Terrain" {
 				float metallic;
 				float smoothness;
 
+				float centralnessLerp;
+
 				float4 tileBaseColor;
-				float4 tileHighlightColor;
-				float tilePower;
+				float latitudePower;
+				float4 sandColor;
+				float sandHeight;
+				float4 dirtColor;
+				float4 grassColor;
+				float grassHeight;
+				float4 iceColor;
+				float iceHeight;
 
 				float borderRatio;
 				float4 borderBaseColor;
@@ -154,18 +175,37 @@ Shader "Culture Miniature/Planet Terrain" {
 						}
 					}
 
+					/* Center position */
+					float3 centerPos = normalize(IN.meshNormal);
+					visualPos = lerp(visualPos, centerPos, centralnessLerp);
+
 					/* Key properties */
 					TerrainInfo terrain;
 					SampleHeight_Local(heightMap, visualPos, terrain);
-					float isBorder = step(IN.centralness, borderRatio);
-					float focusedness = 1 - clamp(distance(IN.planetPos * baseRadius, focusPosition) / focusRadius, 0, 1);
-					float3 borderColor = lerp(borderBaseColor, borderFocusedColor, pow(focusedness, focusGradientPower));
+
+					// Complex terrain info.
 					if(useBakedLaplacian < 0.5)
 						terrain.laplacian = CalculateHeightLaplacianLayered_Local(heightMap, terrain, (int)subdivisionLevel + 1);
 					terrain.gradient = CalculateHeightGradient_Geo(heightMap, Local2Geo(visualPos), subdivisionLevel);
 
+					// Terrain type.
+					float terrainValue = terrain.altitude;
+					terrainValue = lerp(terrainValue, 1, pow(abs(IN.planetPos.y), exp(latitudePower)));
+
+					// Terrain color.
+					float3 tileColor = tileBaseColor;
+					tileColor = lerp(tileColor, sandColor, step(0, terrainValue));
+					tileColor = lerp(tileColor, grassColor, step(sandHeight, terrainValue));
+					tileColor = lerp(tileColor, dirtColor, step(grassHeight, terrainValue));
+					tileColor = lerp(tileColor, iceColor, step(iceHeight, terrainValue));
+
+					// Border.
+					float isBorder = step(IN.centralness, borderRatio);
+					float focusedness = 1 - clamp(distance(IN.planetPos * baseRadius, focusPosition) / focusRadius, 0, 1);
+					float3 borderColor = lerp(borderBaseColor, borderFocusedColor, pow(focusedness, focusGradientPower));
+
 					/* Output */
-					o.Albedo = lerp(tileBaseColor, borderColor, isBorder);
+					o.Albedo = lerp(tileColor, borderColor, isBorder);
 					o.Emission = borderColor * isBorder * borderEmissionIntensity;
 					o.Normal = CalculateTangentSpaceNormal(terrain, normalStrength);
 					o.Metallic = metallic;

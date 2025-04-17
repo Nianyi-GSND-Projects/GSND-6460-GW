@@ -1,6 +1,9 @@
-Shader "Culture Miniature/Planet Terrain Preprocess" {
+Shader "Culture Miniature/Generate Planet Heightmap" {
 	Properties {
-		_MainTex ("Texture", 2D) = "white" {}
+		_MainTex ("Main Texture", 2D) = "black" {}
+		[Int] frequency ("Frequency", Float) = 1
+		amplitude ("Amplitude", Float) = 1
+		[Int] seed ("Seed", Float) = 137
 	}
 	SubShader {
 		Cull Off ZWrite Off ZTest Always
@@ -10,6 +13,8 @@ Shader "Culture Miniature/Planet Terrain Preprocess" {
 			#pragma fragment FragmentProgram
 
 			#include "UnityCG.cginc"
+			#include "./Common Functions.hlsl"
+			#include "./Perlin Noise.hlsl"
 
 			struct appdata {
 				float4 vertex : POSITION;
@@ -30,10 +35,20 @@ Shader "Culture Miniature/Planet Terrain Preprocess" {
 			}
 
 			sampler2D _MainTex;
+			float frequency;
+			float amplitude;
+			float seed;
 
 			float4 FragmentProgram(v2f i) : SV_Target {
-				float4 col = tex2D(_MainTex, i.uv);
-				return col;
+				float v = tex2D(_MainTex, float2(i.uv)).a;
+				float3 local = Geo2Local(Uv2Geo(i.uv));
+				v += Perlin3D(
+					local,
+					frequency,
+					amplitude,
+					(uint)seed
+				);
+				return float4(1, 1, 1, 1) * v;
 			}
 			ENDCG
 		}

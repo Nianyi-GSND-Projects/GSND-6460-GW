@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
+using UnityEngine.UI;
 
 namespace CultureMiniature
 {
@@ -23,6 +23,7 @@ namespace CultureMiniature
 		#endregion
 
 		#region Planet geometry
+		[Header("Geometry")]
 		[SerializeField] private float radius = 500;
 		public float Radius
 		{
@@ -64,16 +65,41 @@ namespace CultureMiniature
 		}
 		#endregion
 
-		#region Terrain map
+		#region Heightmap
+		[Header("Heightmap")]
+		[SerializeField] private int noiseSeed = 137;
 		const string terrainShaderName = "Culture Miniature/Planet Terrain";
 		private RenderTexture heightMap;
-		public void CreateHeightMap()
+		void CreateHeightMap()
 		{
 			if(heightMap)
 				return;
-			heightMap = GenerateHeightMap();
+
+			heightMap = RenderTexture.GetTemporary(2048, 1024, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+			heightMap.enableRandomWrite = true;
+			heightMap.wrapModeU = TextureWrapMode.Repeat;
+			heightMap.wrapModeV = TextureWrapMode.Mirror;
+
 			if(terrainMat)
 				terrainMat.SetTexture("heightMap", heightMap);
+		}
+		[Range(1, 10)][SerializeField] private int maxNoiseLevel = 5;
+		[Range(0, 5)][SerializeField] private int noiseFrequencyLevel = 2;
+		[Range(0.1f, 0.9f)][SerializeField] private float noisePower = 0.5f;
+		void LayerHeightMap(int level)
+		{
+			RenderTexture temp = RenderTexture.GetTemporary(heightMap.descriptor);
+			Graphics.Blit(heightMap, temp);
+			Material mat = new(Shader.Find("Culture Miniature/Generate Planet Heightmap"));
+			mat.SetTexture("_MainTex", temp);
+			float frequency = Mathf.Pow(2f, level + noiseFrequencyLevel);
+			mat.SetFloat("frequency", frequency);
+			float amplitude = Mathf.Pow(noisePower, level);
+			mat.SetFloat("amplitude", amplitude);
+			mat.SetFloat("seed", noiseSeed);
+			Graphics.Blit(temp, heightMap, mat);
+			Destroy(mat);
+			RenderTexture.ReleaseTemporary(temp);
 		}
 		void DestroyHeightMap()
 		{
@@ -81,6 +107,55 @@ namespace CultureMiniature
 				return;
 			RenderTexture.ReleaseTemporary(heightMap);
 			heightMap = null;
+		}
+		#endregion
+
+		#region Baking
+		protected void BakingTexture(string ShaderName, RenderTexture TargetTexture, Mesh mesh, Material material)
+		{
+
+			var shader = Shader.Find(ShaderName);
+			if(!shader)
+			{
+				Debug.LogError($"Shader \"{ShaderName}\" not found!");
+				return;
+			}
+
+			if(material == null) material = new Material(shader);
+
+			RenderTexture temp = RenderTexture.active;
+			RenderTexture.active = TargetTexture;
+
+			GL.Clear(true, true, Color.black);
+			material.SetPass(0);
+			Graphics.DrawMeshNow(mesh, Matrix4x4.identity);
+			RenderTexture.active = temp;
+		}
+
+		#endregion
+
+		#region HexColor
+		RenderTexture HexColortex;
+		[Header("Hex color")]
+		[SerializeField] private bool bakeHexColor = false;
+		public RawImage testOutput;
+		void CreateHexColorMap()
+		{
+			if(HexColortex)
+				return;
+
+			HexColortex = new RenderTexture(2048, 1024, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+			HexColortex.enableRandomWrite = true;
+			HexColortex.Create();
+
+			//HexColortex.wrapModeU = TextureWrapMode.Repeat;
+			//HexColortex.wrapModeV = TextureWrapMode.Mirror;
+
+		}
+		void BakeHexColor()
+		{
+			BakingTexture("Culture Miniature/BakeVertexColor", HexColortex, planetMesh, null);
+			testOutput.texture = HexColortex;
 		}
 		#endregion
 
@@ -105,6 +180,8 @@ namespace CultureMiniature
 		#region Untiy life cycle
 		protected void Start()
 		{
+			noiseSeed = (int)(0xffff * Random.value);
+
 			EnsureTerrainMat();
 			Radius = Radius;
 
@@ -113,6 +190,8 @@ namespace CultureMiniature
 
 		protected void OnDestroy()
 		{
+			DestroyWater();
+
 			if(terrainMat)
 				Destroy(terrainMat);
 			DestroyHeightMap();
@@ -143,6 +222,98 @@ namespace CultureMiniature
 					return;
 				terrainMat.SetVector("focusPosition", value);
 			}
+		}
+		#endregion
+
+		#region Generation
+		[Header("Generation")]
+		[SerializeField] private bool shadeFlat = false;
+		[Range(0, 1)] public float generationDelay = 0.1f;
+		[Range(0, 5)] public float generationInterval = 1f;
+		public IEnumerator GenerationCoroutine()
+		{
+			yield return new WaitForSeconds(generationInterval);
+
+			PlayVFX(dirtEffect);
+			yield return new WaitForSeconds(generationDelay);
+			CreateMesh();
+			yield return new WaitForSeconds(generationInterval);
+
+			for(int i = 0; i < debugSubdivisionLevel; ++i)
+			{
+				PlayVFX(dirtEffect);
+				yield return new WaitForSeconds(generationDelay);
+				SubdivideMesh();
+				yield return new WaitForSeconds(generationInterval);
+			}
+			FinalizeMesh();
+
+			PlayVFX(dirtEffect);
+			yield return new WaitForSeconds(generationDelay);
+			CreateHeightMap();
+			yield return new WaitForSeconds(generationInterval);
+
+			PlayVFX(waterEffect);
+			yield return new WaitForSeconds(generationDelay);
+			CreateWater();
+			yield return new WaitForSeconds(generationInterval);
+
+			for(int i = 0; i <= maxNoiseLevel; ++i)
+			{
+				PlayVFX(dirtEffect);
+				yield return new WaitForSeconds(generationDelay);
+				LayerHeightMap(i);
+				yield return new WaitForSeconds(generationInterval);
+			}
+
+			yield return new WaitForSeconds(generationDelay);
+			CreateHexColorMap();
+			yield return new WaitForSeconds(generationInterval);
+
+			if(bakeHexColor)
+			{
+				yield return new WaitForSeconds(generationDelay);
+				BakeHexColor();
+				yield return new WaitForSeconds(generationInterval);
+			}
+		}
+		#endregion
+
+		#region VFX
+		[SerializeField] private ParticleSystem dirtEffect;
+		[SerializeField] private ParticleSystem waterEffect;
+
+		void PlayVFX(ParticleSystem ps)
+		{
+			StartCoroutine(PlayVFXCoroutine(ps));
+		}
+
+		IEnumerator PlayVFXCoroutine(ParticleSystem ps)
+		{
+			ps.Play();
+			yield return new WaitForSeconds(ps.main.duration);
+			ps.Stop();
+		}
+		#endregion
+
+		#region Water
+		[SerializeField] private Material waterMat;
+		private GameObject water;
+
+		void CreateWater()
+		{
+			water = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+			water.name = "Water";
+			water.transform.SetParent(transform, false);
+			water.GetComponent<MeshFilter>().sharedMesh = planetMesh;
+			water.GetComponent<Renderer>().sharedMaterial = waterMat;
+		}
+
+		void DestroyWater()
+		{
+			if(!water)
+				return;
+			Destroy(water);
 		}
 		#endregion
 	}
